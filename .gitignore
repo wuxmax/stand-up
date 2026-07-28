@@ -1,0 +1,21 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.swp
+*.swo
+*~
+
+# xcodegen output is committed (project.yml is source of truth, .xcodeproj is generated)
+# but per-user workspace state is ignored:
+StandUp.xcodeproj/xcuserdata/
+StandUp.xcodeproj/project.xcworkspace/xcuserdata/
+
+# macOS
+.DS_Store
+
+# SwiftPM
+.swiftpm/
+Package.resolved

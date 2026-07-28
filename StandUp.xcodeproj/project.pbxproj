@@ -1,0 +1,439 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06495AD6083F850CEB0CFCEB /* DeskStatusRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */; };
+		070B5065AA72D009E653E32E /* TimerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */; };
+		0BA06D24F211CD3A58CB47D0 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C825103D18AAD02501EEC /* AppState.swift */; };
+		38587CF9E26BA1B0682A2CD9 /* Posture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FA17D7EB5A42E9C79BCC3B /* Posture.swift */; };
+		4C6935B79B38575E296D49AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A6D66442AEBA60686F7930F5 /* Assets.xcassets */; };
+		4D98EAA82BAEFACD2ACD585E /* LinakDeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4EBD980048CD79619291F /* LinakDeskController.swift */; };
+		98BF8BAD5F4768DEB9AF6E83 /* StatusBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */; };
+		9EEAE0CEE06B43102AA8A87B /* DeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A628E041F55EAE483CBD39E /* DeskController.swift */; };
+		A522F5427B506DB319701F1B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6CF589C387622AB01F2AC9 /* SettingsView.swift */; };
+		B0A6F1F604D3CE114A876E3C /* TimerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EC15616E52A48514A1A823 /* TimerControlsView.swift */; };
+		B6D7C2875375AEE95E71684F /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */; };
+		CD96815A82DEDDC56DCD8771 /* PostureTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013F465E09219F4DFA8DC29F /* PostureTimer.swift */; };
+		D6C8448C70F7CB8CE9E5EFB0 /* MockDeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE34E8A6F22450176952F76 /* MockDeskController.swift */; };
+		E36DDA19EF08E5C04ADC0DB3 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A379DE7250C90C2397121276 /* NotificationManager.swift */; };
+		E74FB891D6AD095D098B713B /* StandUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321996CB790AFF2F900D9279 /* StandUpApp.swift */; };
+		E8ABE084D4CE091C37489275 /* LinakGATT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3119A9759C3A6AAE59047C1B /* LinakGATT.swift */; };
+		EDB1DE0BE2CF42DA95202D17 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		013F465E09219F4DFA8DC29F /* PostureTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostureTimer.swift; sourceTree = "<group>"; };
+		059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		0F6CF589C387622AB01F2AC9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2A628E041F55EAE483CBD39E /* DeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskController.swift; sourceTree = "<group>"; };
+		2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		3119A9759C3A6AAE59047C1B /* LinakGATT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinakGATT.swift; sourceTree = "<group>"; };
+		321996CB790AFF2F900D9279 /* StandUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandUpApp.swift; sourceTree = "<group>"; };
+		435C825103D18AAD02501EEC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		4CF4EBD980048CD79619291F /* LinakDeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinakDeskController.swift; sourceTree = "<group>"; };
+		4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerSettings.swift; sourceTree = "<group>"; };
+		5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarLabelView.swift; sourceTree = "<group>"; };
+		68FA17D7EB5A42E9C79BCC3B /* Posture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Posture.swift; sourceTree = "<group>"; };
+		6939D2A29FEBD263A43FC2EA /* StandUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StandUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A379DE7250C90C2397121276 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		A6D66442AEBA60686F7930F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C2EC15616E52A48514A1A823 /* TimerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControlsView.swift; sourceTree = "<group>"; };
+		CCE34E8A6F22450176952F76 /* MockDeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDeskController.swift; sourceTree = "<group>"; };
+		D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskStatusRow.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2D9868417265DD2AECC1D6E4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */,
+				059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */,
+				0F6CF589C387622AB01F2AC9 /* SettingsView.swift */,
+				5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */,
+				C2EC15616E52A48514A1A823 /* TimerControlsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		304FC1F5F82AC68068C85DD2 /* Desk */ = {
+			isa = PBXGroup;
+			children = (
+				2A628E041F55EAE483CBD39E /* DeskController.swift */,
+				CCE34E8A6F22450176952F76 /* MockDeskController.swift */,
+				ACA0FA408FD9FC5B73D62CEE /* Linak */,
+			);
+			path = Desk;
+			sourceTree = "<group>";
+		};
+		4E08F53F82C92B59D082EE54 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6939D2A29FEBD263A43FC2EA /* StandUp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5013D5198BBA4E10634A1300 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		6A6FD6DFFFA4A445D2AB1FCC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				68FA17D7EB5A42E9C79BCC3B /* Posture.swift */,
+				013F465E09219F4DFA8DC29F /* PostureTimer.swift */,
+				4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		70A85D18AEED5E4CDC30C885 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				435C825103D18AAD02501EEC /* AppState.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		712D1B2E0CD7D27DCB21E4D8 /* StandUp */ = {
+			isa = PBXGroup;
+			children = (
+				A6D66442AEBA60686F7930F5 /* Assets.xcassets */,
+				321996CB790AFF2F900D9279 /* StandUpApp.swift */,
+				304FC1F5F82AC68068C85DD2 /* Desk */,
+				6A6FD6DFFFA4A445D2AB1FCC /* Models */,
+				875AE4140E8B420FADAEA66B /* Notifications */,
+				5013D5198BBA4E10634A1300 /* Settings */,
+				70A85D18AEED5E4CDC30C885 /* State */,
+				2D9868417265DD2AECC1D6E4 /* Views */,
+			);
+			path = StandUp;
+			sourceTree = "<group>";
+		};
+		875AE4140E8B420FADAEA66B /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				A379DE7250C90C2397121276 /* NotificationManager.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		8C9586719FFC389D3C3363BD = {
+			isa = PBXGroup;
+			children = (
+				712D1B2E0CD7D27DCB21E4D8 /* StandUp */,
+				4E08F53F82C92B59D082EE54 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		ACA0FA408FD9FC5B73D62CEE /* Linak */ = {
+			isa = PBXGroup;
+			children = (
+				4CF4EBD980048CD79619291F /* LinakDeskController.swift */,
+				3119A9759C3A6AAE59047C1B /* LinakGATT.swift */,
+			);
+			path = Linak;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AF9AA48B0E2BF2F8910DB5A4 /* StandUp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F8C42C3ADD460EAB6C5B11B6 /* Build configuration list for PBXNativeTarget "StandUp" */;
+			buildPhases = (
+				AA8EAE1F107B853EE9408632 /* Sources */,
+				BA9F5F62ED3C1B97BF64A0B2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StandUp;
+			packageProductDependencies = (
+			);
+			productName = StandUp;
+			productReference = 6939D2A29FEBD263A43FC2EA /* StandUp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		20786A6A1192BED6009B30EF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					AF9AA48B0E2BF2F8910DB5A4 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D09EBD89B685B9B39B284A47 /* Build configuration list for PBXProject "StandUp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8C9586719FFC389D3C3363BD;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4E08F53F82C92B59D082EE54 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AF9AA48B0E2BF2F8910DB5A4 /* StandUp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BA9F5F62ED3C1B97BF64A0B2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C6935B79B38575E296D49AD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA8EAE1F107B853EE9408632 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0BA06D24F211CD3A58CB47D0 /* AppState.swift in Sources */,
+				9EEAE0CEE06B43102AA8A87B /* DeskController.swift in Sources */,
+				06495AD6083F850CEB0CFCEB /* DeskStatusRow.swift in Sources */,
+				4D98EAA82BAEFACD2ACD585E /* LinakDeskController.swift in Sources */,
+				E8ABE084D4CE091C37489275 /* LinakGATT.swift in Sources */,
+				EDB1DE0BE2CF42DA95202D17 /* MenuBarContentView.swift in Sources */,
+				D6C8448C70F7CB8CE9E5EFB0 /* MockDeskController.swift in Sources */,
+				E36DDA19EF08E5C04ADC0DB3 /* NotificationManager.swift in Sources */,
+				38587CF9E26BA1B0682A2CD9 /* Posture.swift in Sources */,
+				CD96815A82DEDDC56DCD8771 /* PostureTimer.swift in Sources */,
+				A522F5427B506DB319701F1B /* SettingsView.swift in Sources */,
+				B6D7C2875375AEE95E71684F /* SettingsWindowController.swift in Sources */,
+				E74FB891D6AD095D098B713B /* StandUpApp.swift in Sources */,
+				98BF8BAD5F4768DEB9AF6E83 /* StatusBarLabelView.swift in Sources */,
+				B0A6F1F604D3CE114A876E3C /* TimerControlsView.swift in Sources */,
+				070B5065AA72D009E653E32E /* TimerSettings.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A9FC2F7F2A7613A80E7ABF4D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = StandUp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DA2EDC64CEFBF46FC0E79FD9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = StandUp/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
+				PRODUCT_NAME = StandUp;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E1ABA95ECCCB7E2137373C93 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = StandUp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F818A84719FE11D43A31C1D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = StandUp/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
+				PRODUCT_NAME = StandUp;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D09EBD89B685B9B39B284A47 /* Build configuration list for PBXProject "StandUp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA2EDC64CEFBF46FC0E79FD9 /* Debug */,
+				F818A84719FE11D43A31C1D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F8C42C3ADD460EAB6C5B11B6 /* Build configuration list for PBXNativeTarget "StandUp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A9FC2F7F2A7613A80E7ABF4D /* Debug */,
+				E1ABA95ECCCB7E2137373C93 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 20786A6A1192BED6009B30EF /* Project object */;
+}

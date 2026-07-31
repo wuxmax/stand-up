@@ -60,6 +60,12 @@ enum LinakGATT {
         Data([cmd.rawValue, 0])
     }
 
+    /// Parse a DPG notification response. Valid iff `data[0] == 1`; payload is `data[2...]`.
+    static func dpgParsePayload(_ data: Data) -> Data? {
+        guard data.count >= 2, data[0] == 1 else { return nil }
+        return data.subdata(in: 2..<data.count)
+    }
+
     static func dpgReadRequestBytes(_ cmd: DPGCommand) -> Data {
         Data([127, cmd.rawValue, 0])
     }

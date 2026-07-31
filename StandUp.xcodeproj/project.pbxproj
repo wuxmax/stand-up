@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		06495AD6083F850CEB0CFCEB /* DeskStatusRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */; };
 		070B5065AA72D009E653E32E /* TimerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */; };
 		0BA06D24F211CD3A58CB47D0 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C825103D18AAD02501EEC /* AppState.swift */; };
 		38587CF9E26BA1B0682A2CD9 /* Posture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FA17D7EB5A42E9C79BCC3B /* Posture.swift */; };
@@ -19,7 +18,7 @@
 		B0A6F1F604D3CE114A876E3C /* TimerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EC15616E52A48514A1A823 /* TimerControlsView.swift */; };
 		B6D7C2875375AEE95E71684F /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */; };
 		CD96815A82DEDDC56DCD8771 /* PostureTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013F465E09219F4DFA8DC29F /* PostureTimer.swift */; };
-		D6C8448C70F7CB8CE9E5EFB0 /* MockDeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE34E8A6F22450176952F76 /* MockDeskController.swift */; };
+		D0A0B5276489292ACE8E4378 /* DeskControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B9AD5E88ADC05174DB6711 /* DeskControlView.swift */; };
 		E36DDA19EF08E5C04ADC0DB3 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A379DE7250C90C2397121276 /* NotificationManager.swift */; };
 		E74FB891D6AD095D098B713B /* StandUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321996CB790AFF2F900D9279 /* StandUpApp.swift */; };
 		E8ABE084D4CE091C37489275 /* LinakGATT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3119A9759C3A6AAE59047C1B /* LinakGATT.swift */; };
@@ -40,18 +39,17 @@
 		5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarLabelView.swift; sourceTree = "<group>"; };
 		68FA17D7EB5A42E9C79BCC3B /* Posture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Posture.swift; sourceTree = "<group>"; };
 		6939D2A29FEBD263A43FC2EA /* StandUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StandUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B9AD5E88ADC05174DB6711 /* DeskControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskControlView.swift; sourceTree = "<group>"; };
 		A379DE7250C90C2397121276 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A6D66442AEBA60686F7930F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2EC15616E52A48514A1A823 /* TimerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControlsView.swift; sourceTree = "<group>"; };
-		CCE34E8A6F22450176952F76 /* MockDeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDeskController.swift; sourceTree = "<group>"; };
-		D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskStatusRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		2D9868417265DD2AECC1D6E4 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				D61BB3CB3DDBFBEA60E446AB /* DeskStatusRow.swift */,
+				A1B9AD5E88ADC05174DB6711 /* DeskControlView.swift */,
 				059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */,
 				0F6CF589C387622AB01F2AC9 /* SettingsView.swift */,
 				5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */,
@@ -64,7 +62,6 @@
 			isa = PBXGroup;
 			children = (
 				2A628E041F55EAE483CBD39E /* DeskController.swift */,
-				CCE34E8A6F22450176952F76 /* MockDeskController.swift */,
 				ACA0FA408FD9FC5B73D62CEE /* Linak */,
 			);
 			path = Desk;
@@ -216,12 +213,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				0BA06D24F211CD3A58CB47D0 /* AppState.swift in Sources */,
+				D0A0B5276489292ACE8E4378 /* DeskControlView.swift in Sources */,
 				9EEAE0CEE06B43102AA8A87B /* DeskController.swift in Sources */,
-				06495AD6083F850CEB0CFCEB /* DeskStatusRow.swift in Sources */,
 				4D98EAA82BAEFACD2ACD585E /* LinakDeskController.swift in Sources */,
 				E8ABE084D4CE091C37489275 /* LinakGATT.swift in Sources */,
 				EDB1DE0BE2CF42DA95202D17 /* MenuBarContentView.swift in Sources */,
-				D6C8448C70F7CB8CE9E5EFB0 /* MockDeskController.swift in Sources */,
 				E36DDA19EF08E5C04ADC0DB3 /* NotificationManager.swift in Sources */,
 				38587CF9E26BA1B0682A2CD9 /* Posture.swift in Sources */,
 				CD96815A82DEDDC56DCD8771 /* PostureTimer.swift in Sources */,

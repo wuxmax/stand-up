@@ -5,8 +5,8 @@ struct SettingsView: View {
 
     @State private var sitMinutes: Double = 30
     @State private var standMinutes: Double = 5
-    @State private var sitHeightMm: Double = 700
-    @State private var standHeightMm: Double = 1100
+    @State private var sitHeightMm: Double = 100
+    @State private var standHeightMm: Double = 600
     @State private var baseHeightMm: Double = 0
     @State private var deskAddress: String = ""
 
@@ -68,36 +68,29 @@ struct SettingsView: View {
                 Toggle("Enable desk control", isOn: deskEnabledBinding)
                 Toggle("Auto-move desk on interval end", isOn: autoControlBinding)
                     .disabled(!appState.isDeskControlEnabled)
-                Picker("Controller", selection: controlModeBinding) {
-                    Text("Mock (simulate)").tag(DeskControlMode.mock)
-                    Text("LINAK (Bluetooth)").tag(DeskControlMode.linak)
-                }
-                .pickerStyle(.segmented)
             }
 
-            if appState.deskSettings.controlMode == .linak {
-                Section("LINAK connection") {
-                    TextField("Desk UUID (macOS BLE)", text: $deskAddress)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: deskAddress) { _, _ in persistDeskSettings() }
-                    LabeledContent("Base height (mm)") {
-                        TextField("auto", value: $baseHeightMm, format: .number)
-                            .frame(width: 80)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    .onChange(of: baseHeightMm) { _, _ in persistDeskSettings() }
+            Section("LINAK connection") {
+                TextField("Desk UUID (optional — leave blank to auto-scan)", text: $deskAddress)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: deskAddress) { _, _ in persistDeskSettings() }
+                LabeledContent("Base height (mm)") {
+                    TextField("auto", value: $baseHeightMm, format: .number)
+                        .frame(width: 80)
+                        .multilineTextAlignment(.trailing)
                 }
+                .onChange(of: baseHeightMm) { _, _ in persistDeskSettings() }
             }
 
             Section("Favourite heights (mm above floor)") {
                 LabeledContent("Sit") {
-                    TextField("700", value: $sitHeightMm, format: .number)
+                    TextField("0–1300", value: $sitHeightMm, format: .number)
                         .frame(width: 80)
                         .multilineTextAlignment(.trailing)
                 }
                 .onChange(of: sitHeightMm) { _, _ in persistDeskSettings() }
                 LabeledContent("Stand") {
-                    TextField("1100", value: $standHeightMm, format: .number)
+                    TextField("0–1300", value: $standHeightMm, format: .number)
                         .frame(width: 80)
                         .multilineTextAlignment(.trailing)
                 }
@@ -137,17 +130,6 @@ struct SettingsView: View {
         )
     }
 
-    private var controlModeBinding: Binding<DeskControlMode> {
-        Binding(
-            get: { appState.deskSettings.controlMode },
-            set: { v in
-                var s = appState.deskSettings
-                s.controlMode = v
-                DispatchQueue.main.async { appState.updateDeskSettings(s) }
-            }
-        )
-    }
-
     private var sitMinutesBinding: Binding<Double> {
         Binding(
             get: { sitMinutes },
@@ -171,8 +153,8 @@ struct SettingsView: View {
 
     private func persistDeskSettings() {
         var s = appState.deskSettings
-        s.sitHeightMm = Int(sitHeightMm)
-        s.standHeightMm = Int(standHeightMm)
+        s.sitHeightMm = DeskSettings.clamp(Int(sitHeightMm))
+        s.standHeightMm = DeskSettings.clamp(Int(standHeightMm))
         s.baseHeightMm = baseHeightMm > 0 ? Int(baseHeightMm) : nil
         s.deskAddress = deskAddress
         DispatchQueue.main.async { appState.updateDeskSettings(s) }

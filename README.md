@@ -1,11 +1,15 @@
 # StandUp
 
-A small macOS menu-bar app that reminds you to alternate between sitting and standing at your (motorized) desk, and — in iteration 2 — can drive a LINAK standing desk over Bluetooth.
+A small macOS menu-bar app that reminds you to alternate between sitting and standing at your (motorized) desk, and can drive a LINAK standing desk over Bluetooth.
+
+## Credits
+
+The LINAK Bluetooth protocol implementation is a native Swift port of [rhyst/linak-controller](https://github.com/rhyst/linak-controller) (Python/bleak). The desk control UI and overall app design are inspired by [Idasen](https://gitlab.com/Kai.Oezer/idasen) by Kai Özer, a macOS status bar app for the IKEA Idåsen desk.
 
 ## Status
 
-- **Iteration 1 (done):** menu-bar timer, sit/stand intervals, start/pause, reset, switch-mode, native notifications.
-- **Iteration 2 (scaffolded):** a `DeskController` layer with a `MockDeskController` (works now, no hardware) and a `LinakDeskController` (native Swift/CoreBluetooth port of [rhyst/linak-controller](https://github.com/rhyst/linak-controller)). The LINAK driver is a faithful port of the on-air protocol but has **not yet been validated against real hardware**.
+- Menu-bar timer, sit/stand intervals, start/pause, reset, switch-mode, native notifications at interval end.
+- LINAK desk control over Bluetooth: connect, live height display, manual up/down jog, and preset sit/stand heights.
 
 ## Requirements
 
@@ -34,11 +38,11 @@ python3 scripts/generate_icon.py
 
 ## How it works
 
-- `StandUpApp` hosts a `MenuBarExtra` (the popover UI) and a `Settings` scene.
+- `StandUpApp` hosts a `MenuBarExtra` (the popover UI). Settings are shown in a separate `NSWindow` managed by `SettingsWindowController` (SwiftUI's `Settings` scene doesn't work reliably for `LSUIElement` apps).
 - `AppState` (`@MainActor`) owns `TimerSettings`, `DeskSettings`, a `PostureTimer`, the notification manager, and an optional `DeskController`.
 - `PostureTimer` ticks every second; on interval completion it posts a `Notification` and `AppState` fires a sit/stand user notification (and, if enabled, moves the desk).
 - Settings persist to `UserDefaults`.
-- The desk layer is behind a `DeskController` protocol. `DeskFactory.make(mode:settings:)` returns either `MockDeskController` or `LinakDeskController`.
+- The desk layer is behind the `DeskController` protocol; the sole implementation is `LinakDeskController` (CoreBluetooth).
 
 ## LINAK integration (iteration 2)
 
@@ -70,7 +74,7 @@ The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhys
 
 ```
 StandUp/
-  StandUpApp.swift              # @main, MenuBarExtra + Settings scene
+  StandUpApp.swift              # @main, MenuBarExtra scene
   Info.plist                    # LSUIElement, Bluetooth usage description
   StandUp.entitlements          # sandbox + Bluetooth
   Models/
@@ -80,11 +84,12 @@ StandUp/
   Notifications/
     NotificationManager.swift   # UNUserNotificationCenter wrappers
   Desk/
-    DeskController.swift        # protocol, DeskSnapshot, DeskSettings, DeskFactory
-    MockDeskController.swift    # simulated desk (no hardware)
+    DeskController.swift        # protocol, DeskSnapshot, DeskSettings
     Linak/
       LinakGATT.swift           # GATT UUIDs + byte packing
       LinakDeskController.swift # CoreBluetooth driver
+  Settings/
+    SettingsWindowController.swift # NSWindow-based settings (no SwiftUI Settings scene)
   State/
     AppState.swift              # wires timer + notifications + desk, persists settings
   Views/

@@ -12,7 +12,7 @@ A macOS menu-bar app (SwiftUI, macOS 14+) that nudges you to sit/stand and can d
 
 - `AppState` (`@MainActor`, `ObservableObject`) is the single source of truth. It owns `TimerSettings`, `DeskSettings`, a `PostureTimer`, `NotificationManager`, and an optional `DeskController`. It persists settings to `UserDefaults`.
 - `PostureTimer` is a classic `Timer`-based 1s ticker. On interval completion it flips posture and posts `PostureTimer.Static.tickCompleteNotification`; `AppState` observes that (set up in `AppState.init`) and fires a user notification + optional desk move.
-- The desk layer is behind the `DeskController` protocol. `DeskFactory.make(mode:settings:)` returns `MockDeskController` (no hardware) or `LinakDeskController` (CoreBluetooth). **Do not** put BLE code anywhere outside `StandUp/Desk/Linak/`.
+- The desk layer is behind the `DeskController` protocol. The sole implementation is `LinakDeskController` (CoreBluetooth). **Do not** put BLE code anywhere outside `StandUp/Desk/Linak/`.
 - `MenuBarExtra` popover shows the timer + controls. The app is `LSUIElement` (menu-bar only, no Dock icon).
 - Settings is NOT a SwiftUI `Settings` scene. SwiftUI scenes don't work reliably for `LSUIElement` apps (window never gets focus / doesn't reopen). Instead `SettingsWindowController` (`StandUp/Settings/`) owns a single `NSWindow` (kept alive via `isReleasedWhenClosed = false`) hosting `SettingsView`, toggling `NSApp.setActivationPolicy(.regular)` while open and back to `.accessory` on `windowWillClose`. Open via `SettingsWindowController.shared.open(appState:)`. Do not reintroduce a `Settings`/`WindowGroup` scene for this.
 
@@ -22,9 +22,9 @@ A macOS menu-bar app (SwiftUI, macOS 14+) that nudges you to sit/stand and can d
 - `linak_controller/gatt.py` — UUIDs + `encode_height`/`decode_height_speed` (struct `<H` height, `<Hh` height+speed, little-endian).
 - `linak_controller/desk.py` — the move loop: `wakeup`, `stop`, then repeatedly write Reference Input until Reference Output speed == 0.
 
-Height semantics: on-wire value is **tenths of a mm relative to base height**; UI values are **mm above floor**. Conversion lives in `LinakDeskController` (`lastHumanHeightMm`, `moveTo`).
+Height semantics: on-wire value is **tenths of a mm relative to base height**; UI values are **absolute mm above floor**. The base offset is read from the desk during the DPG handshake; the same absolute mm number is used for the displayed height, sit/stand presets, and `moveTo` conversion (`resolvedBaseMm`, `lastHumanHeightMm`). Control commands (`wakeup`/`stop`/`moveUp`/`moveDown`) are written as **two bytes** `[cmd, 0]` with `stop = 255`.
 
-**Not yet implemented vs. the Python version:** the DPG init handshake (read capabilities, set user-id byte to 1, read base offset). Only connect/discover/move/notify is implemented. If a real desk misbehaves, that handshake is the first thing to port.
+**DPG init handshake** (capabilities, set user-id byte to 1, read base offset) is implemented in `LinakDeskController.performDPGHandshake`, run after all characteristics are discovered and before surfacing `.connected`. Jog (`jogUp`/`jogDown`) repeats `moveUp`/`moveDown` every ~300ms while held (a single command is only a ~12mm nudge) and sends `stop` on release.
 
 ## Conventions
 
@@ -39,4 +39,4 @@ Height semantics: on-wire value is **tenths of a mm relative to base height**; U
 1. `xcodegen generate` succeeds and `StandUp.xcodeproj/` is up to date with the file tree.
 2. Open in Xcode and build the **StandUp** scheme (⌘B). Fix any compile errors.
 3. Run (⌘R): confirm the menu-bar item appears, Start/Pause/Reset/Switch work, and a sit↔stand notification fires when an interval elapses.
-4. In Settings → Desk, enable **Mock** desk control and confirm the popover shows a (simulated) connection and "Move desk" animates height.
+4. In Settings → Desk, enable desk control and connect to a real LINAK desk: confirm the DPG handshake logs `user-id=1`, jog up/down moves the desk continuously while held and stops on release, and sit/stand presets move the desk with no lockout / bricking across repeated cycles (physical panel buttons stay responsive).

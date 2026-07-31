@@ -15,11 +15,7 @@ struct MenuBarContentView: View {
 
             if appState.isDeskControlEnabled {
                 Divider()
-                DeskStatusRow(snapshot: appState.deskSnapshot)
-                Button("Move desk to \(postureTimer.posture.opposite.label)") {
-                    Task { await appState.moveDeskToCurrentPosture() }
-                }
-                .disabled(appState.deskSnapshot.connection != .connected)
+                DeskControlView(appState: appState)
             }
 
             if !appState.notificationsAuthorized {

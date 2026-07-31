@@ -23,7 +23,11 @@ final class AppState: ObservableObject {
 
     init() {
         let timerSettings = UserDefaults.standard.loadTimerSettings() ?? .default
-        let deskSettings = UserDefaults.standard.loadDeskSettings() ?? .default
+        var deskSettings = UserDefaults.standard.loadDeskSettings() ?? .default
+        if deskSettings.sitHeightMm > DeskSettings.maxHeightMm || deskSettings.standHeightMm > DeskSettings.maxHeightMm {
+            deskSettings = .default
+            UserDefaults.standard.saveDeskSettings(deskSettings)
+        }
         self.timerSettings = timerSettings
         self.deskSettings = deskSettings
         self.postureTimer = PostureTimer(settings: timerSettings)
@@ -84,11 +88,17 @@ final class AppState: ObservableObject {
     }
 
     func updateDeskSettings(_ settings: DeskSettings) {
+        let addressChanged = settings.deskAddress != deskSettings.deskAddress
         deskSettings = settings
         UserDefaults.standard.saveDeskSettings(settings)
-        // Re-create the desk controller if desk control is active so new settings take effect.
+        // Only a changed desk UUID requires reconnecting; height presets can be
+        // applied live without tearing down the BLE connection.
         if isDeskControlEnabled {
-            restartDeskController()
+            if addressChanged {
+                restartDeskController()
+            } else {
+                desk?.updateSettings(settings)
+            }
         }
     }
 
@@ -118,6 +128,29 @@ final class AppState: ObservableObject {
         await desk.moveTo(target)
     }
 
+    func moveDesk(to target: DeskTarget) async {
+        guard let desk else { return }
+        await desk.moveTo(target)
+    }
+
+    func jogDeskUp() { desk?.jogUp() }
+    func jogDeskDown() { desk?.jogDown() }
+    func stopDesk() { desk?.stop() }
+
+    func setSitPresetToCurrentHeight() {
+        guard let h = deskSnapshot.heightMm else { return }
+        var s = deskSettings
+        s.sitHeightMm = DeskSettings.clamp(h)
+        updateDeskSettings(s)
+    }
+
+    func setStandPresetToCurrentHeight() {
+        guard let h = deskSnapshot.heightMm else { return }
+        var s = deskSettings
+        s.standHeightMm = DeskSettings.clamp(h)
+        updateDeskSettings(s)
+    }
+
     private func handleTickComplete(newPosture: Posture) {
         switch newPosture {
         case .standing: notificationManager.sendStandUpNotification()
@@ -131,7 +164,7 @@ final class AppState: ObservableObject {
     private func restartDeskController() {
         deskEventTask?.cancel()
         desk?.disconnect()
-        let controller = DeskFactory.make(mode: deskSettings.controlMode, settings: deskSettings)
+        let controller = LinakDeskController(settings: deskSettings)
         desk = controller
         deskSnapshot = .idle
         deskEventTask = Task { [weak controller, weak self] in

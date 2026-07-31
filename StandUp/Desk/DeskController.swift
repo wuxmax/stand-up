@@ -3,6 +3,7 @@ import Foundation
 enum DeskConnectionState: Equatable, Sendable {
     case disconnected
     case connecting
+    case scanning
     case connected
     case error(String)
 }
@@ -38,44 +39,34 @@ protocol DeskController: AnyObject {
     func connect() async
     func disconnect()
     func moveTo(_ target: DeskTarget) async
+    func jogUp()
+    func jogDown()
+    func stop()
+    func updateSettings(_ settings: DeskSettings)
 }
 
 extension DeskController {
     func notify(_ event: DeskEvent) {
         eventHandler?(event)
     }
-}
-
-enum DeskFactory {
-    static func make(mode: DeskControlMode, settings: DeskSettings) -> DeskController {
-        switch mode {
-        case .mock:
-            return MockDeskController()
-        case .linak:
-            return LinakDeskController(settings: settings)
-        }
-    }
-}
-
-enum DeskControlMode: String, Codable, CaseIterable {
-    case mock
-    case linak
+    func updateSettings(_ settings: DeskSettings) {}
 }
 
 struct DeskSettings: Codable, Equatable, Sendable {
-    var controlMode: DeskControlMode
     var deskAddress: String
     var baseHeightMm: Int?
     var sitHeightMm: Int
     var standHeightMm: Int
     var moveCommandPeriod: TimeInterval
 
+    static let minHeightMm = 0
+    static let maxHeightMm = 1300
+
     static let `default` = DeskSettings(
-        controlMode: .mock,
         deskAddress: "",
         baseHeightMm: nil,
-        sitHeightMm: 700,
-        standHeightMm: 1100,
+        sitHeightMm: 100,
+        standHeightMm: 600,
         moveCommandPeriod: 0.4
     )
 
@@ -85,5 +76,9 @@ struct DeskSettings: Codable, Equatable, Sendable {
         case .stand:          return standHeightMm
         case .heightMm(let h): return h
         }
+    }
+
+    static func clamp(_ mm: Int) -> Int {
+        min(maxHeightMm, max(minHeightMm, mm))
     }
 }

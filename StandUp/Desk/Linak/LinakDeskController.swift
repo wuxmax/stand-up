@@ -22,7 +22,7 @@ final class LinakDeskController: NSObject, DeskController {
     private var lastSpeedInternal: Int = 0
 
     private var dpgSubscribed = false
-    private var dpgContinuation: CheckedContinuation<Data, Error>?
+    private let dpgBox = DPGContinuationBox()
     private var scanTimeoutTask: Task<Void, Never>?
     private var baseOffsetMm: Int?
     private var didStartHandshake = false
@@ -91,8 +91,8 @@ final class LinakDeskController: NSObject, DeskController {
         jogTask = nil
         scanTimeoutTask?.cancel()
         scanTimeoutTask = nil
-        dpgContinuation?.resume(throwing: CancellationError())
-        dpgContinuation = nil
+        dpgBox.continuation?.resume(throwing: CancellationError())
+        dpgBox.continuation = nil
         dpgSubscribed = false
         if isScanning { central.stopScan(); isScanning = false }
         if let p = peripheral { central.cancelPeripheralConnection(p) }
@@ -256,18 +256,18 @@ final class LinakDeskController: NSObject, DeskController {
     private func dpgRequest(_ cmd: LinakGATT.DPGCommand, payload: [UInt8]?) async throws -> Data? {
         guard let p = peripheral, let c = dpgChar else { return nil }
         ensureDpgSubscribed()
+        let box = dpgBox
         let raw = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Data, Error>) in
-            dpgContinuation = cont
+            box.continuation = cont
             let bytes = (payload == nil)
                 ? LinakGATT.dpgReadRequestBytes(cmd)
                 : LinakGATT.dpgWriteRequestBytes(cmd, payload: payload!)
             p.writeValue(bytes, for: c, type: .withResponse)
             Task {
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
-                DispatchQueue.main.async { [weak self] in
-                    guard let self else { return }
-                    if let pending = self.dpgContinuation {
-                        self.dpgContinuation = nil
+                DispatchQueue.main.async {
+                    if let pending = box.continuation {
+                        box.continuation = nil
                         pending.resume(throwing: NSError(domain: "LinakDeskController", code: -1,
                                                          userInfo: [NSLocalizedDescriptionKey: "DPG response timeout"]))
                     }
@@ -433,8 +433,8 @@ extension LinakDeskController: CBPeripheralDelegate {
             snapshot = snap
             notify(.snapshot(snap))
         case LinakGATT.dpgChar:
-            if let cont = dpgContinuation {
-                dpgContinuation = nil
+            if let cont = dpgBox.continuation {
+                dpgBox.continuation = nil
                 cont.resume(returning: data)
             } else {
                 log("DPG notification (unsolicited): \(data.map { String(format: "%02x", $0) }.joined(separator: " "))")
@@ -445,4 +445,8 @@ extension LinakDeskController: CBPeripheralDelegate {
             break
         }
     }
+}
+
+private final class DPGContinuationBox: @unchecked Sendable {
+    var continuation: CheckedContinuation<Data, Error>?
 }

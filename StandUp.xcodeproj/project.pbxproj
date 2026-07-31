@@ -9,39 +9,58 @@
 /* Begin PBXBuildFile section */
 		070B5065AA72D009E653E32E /* TimerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */; };
 		0BA06D24F211CD3A58CB47D0 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435C825103D18AAD02501EEC /* AppState.swift */; };
+		2FD6AE0405F971C7A098A54E /* LinakGATTTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E71C4691401798B9ECF5706 /* LinakGATTTests.swift */; };
 		38587CF9E26BA1B0682A2CD9 /* Posture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FA17D7EB5A42E9C79BCC3B /* Posture.swift */; };
 		4C6935B79B38575E296D49AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A6D66442AEBA60686F7930F5 /* Assets.xcassets */; };
 		4D98EAA82BAEFACD2ACD585E /* LinakDeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF4EBD980048CD79619291F /* LinakDeskController.swift */; };
+		83AC51D583522F984CF88160 /* DeskSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A17B2D817C39C96767CC4E /* DeskSettingsTests.swift */; };
 		98BF8BAD5F4768DEB9AF6E83 /* StatusBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */; };
 		9EEAE0CEE06B43102AA8A87B /* DeskController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A628E041F55EAE483CBD39E /* DeskController.swift */; };
 		A522F5427B506DB319701F1B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F6CF589C387622AB01F2AC9 /* SettingsView.swift */; };
 		B0A6F1F604D3CE114A876E3C /* TimerControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EC15616E52A48514A1A823 /* TimerControlsView.swift */; };
 		B6D7C2875375AEE95E71684F /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */; };
+		CB73656AB5666A33B1FF1F29 /* TimerSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FEDD8B5FD2443462C2D440 /* TimerSettingsTests.swift */; };
 		CD96815A82DEDDC56DCD8771 /* PostureTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013F465E09219F4DFA8DC29F /* PostureTimer.swift */; };
 		D0A0B5276489292ACE8E4378 /* DeskControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B9AD5E88ADC05174DB6711 /* DeskControlView.swift */; };
 		E36DDA19EF08E5C04ADC0DB3 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A379DE7250C90C2397121276 /* NotificationManager.swift */; };
 		E74FB891D6AD095D098B713B /* StandUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321996CB790AFF2F900D9279 /* StandUpApp.swift */; };
+		E85A6AC1064B7D8F240EF735 /* PostureTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2997FE7020B87C0AB17AFDCB /* PostureTimerTests.swift */; };
 		E8ABE084D4CE091C37489275 /* LinakGATT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3119A9759C3A6AAE59047C1B /* LinakGATT.swift */; };
 		EDB1DE0BE2CF42DA95202D17 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2CC9ED658457D71D943CE5FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 20786A6A1192BED6009B30EF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF9AA48B0E2BF2F8910DB5A4;
+			remoteInfo = StandUp;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		013F465E09219F4DFA8DC29F /* PostureTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostureTimer.swift; sourceTree = "<group>"; };
 		059CB46C7BFD008CFF0650C1 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		0F6CF589C387622AB01F2AC9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2997FE7020B87C0AB17AFDCB /* PostureTimerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostureTimerTests.swift; sourceTree = "<group>"; };
 		2A628E041F55EAE483CBD39E /* DeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskController.swift; sourceTree = "<group>"; };
 		2B4B65BA82F7D3AB000D1D0F /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
 		3119A9759C3A6AAE59047C1B /* LinakGATT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinakGATT.swift; sourceTree = "<group>"; };
 		321996CB790AFF2F900D9279 /* StandUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandUpApp.swift; sourceTree = "<group>"; };
+		3E71C4691401798B9ECF5706 /* LinakGATTTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinakGATTTests.swift; sourceTree = "<group>"; };
 		435C825103D18AAD02501EEC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		4CF4EBD980048CD79619291F /* LinakDeskController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinakDeskController.swift; sourceTree = "<group>"; };
 		4DE277FA87F89CD0ED96DE26 /* TimerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerSettings.swift; sourceTree = "<group>"; };
+		59FEDD8B5FD2443462C2D440 /* TimerSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerSettingsTests.swift; sourceTree = "<group>"; };
 		5C07E00B890B1E7DC78C854E /* StatusBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarLabelView.swift; sourceTree = "<group>"; };
 		68FA17D7EB5A42E9C79BCC3B /* Posture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Posture.swift; sourceTree = "<group>"; };
 		6939D2A29FEBD263A43FC2EA /* StandUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StandUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97A17B2D817C39C96767CC4E /* DeskSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskSettingsTests.swift; sourceTree = "<group>"; };
 		A1B9AD5E88ADC05174DB6711 /* DeskControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskControlView.swift; sourceTree = "<group>"; };
 		A379DE7250C90C2397121276 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A6D66442AEBA60686F7930F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B6872A7620711A0B62742D0E /* StandUpTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StandUpTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2EC15616E52A48514A1A823 /* TimerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControlsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,10 +86,22 @@
 			path = Desk;
 			sourceTree = "<group>";
 		};
+		3DC8E8E24AFE0FD10FF513F9 /* StandUpTests */ = {
+			isa = PBXGroup;
+			children = (
+				97A17B2D817C39C96767CC4E /* DeskSettingsTests.swift */,
+				3E71C4691401798B9ECF5706 /* LinakGATTTests.swift */,
+				2997FE7020B87C0AB17AFDCB /* PostureTimerTests.swift */,
+				59FEDD8B5FD2443462C2D440 /* TimerSettingsTests.swift */,
+			);
+			path = StandUpTests;
+			sourceTree = "<group>";
+		};
 		4E08F53F82C92B59D082EE54 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				6939D2A29FEBD263A43FC2EA /* StandUp.app */,
+				B6872A7620711A0B62742D0E /* StandUpTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,6 +159,7 @@
 			isa = PBXGroup;
 			children = (
 				712D1B2E0CD7D27DCB21E4D8 /* StandUp */,
+				3DC8E8E24AFE0FD10FF513F9 /* StandUpTests */,
 				4E08F53F82C92B59D082EE54 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -144,6 +176,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		60FF54F012D53DA9B3A4C259 /* StandUpTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EECB8E2996D21BEA3F90F677 /* Build configuration list for PBXNativeTarget "StandUpTests" */;
+			buildPhases = (
+				83CD22F766F770E1E1265EEB /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A56050C9A04D4A0B4BC05D78 /* PBXTargetDependency */,
+			);
+			name = StandUpTests;
+			packageProductDependencies = (
+			);
+			productName = StandUpTests;
+			productReference = B6872A7620711A0B62742D0E /* StandUpTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		AF9AA48B0E2BF2F8910DB5A4 /* StandUp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F8C42C3ADD460EAB6C5B11B6 /* Build configuration list for PBXNativeTarget "StandUp" */;
@@ -171,6 +221,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					60FF54F012D53DA9B3A4C259 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
 					AF9AA48B0E2BF2F8910DB5A4 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
@@ -192,6 +246,7 @@
 			projectRoot = "";
 			targets = (
 				AF9AA48B0E2BF2F8910DB5A4 /* StandUp */,
+				60FF54F012D53DA9B3A4C259 /* StandUpTests */,
 			);
 		};
 /* End PBXProject section */
@@ -208,6 +263,17 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		83CD22F766F770E1E1265EEB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83AC51D583522F984CF88160 /* DeskSettingsTests.swift in Sources */,
+				2FD6AE0405F971C7A098A54E /* LinakGATTTests.swift in Sources */,
+				E85A6AC1064B7D8F240EF735 /* PostureTimerTests.swift in Sources */,
+				CB73656AB5666A33B1FF1F29 /* TimerSettingsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA8EAE1F107B853EE9408632 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,20 +298,72 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		A56050C9A04D4A0B4BC05D78 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF9AA48B0E2BF2F8910DB5A4 /* StandUp */;
+			targetProxy = 2CC9ED658457D71D943CE5FF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		14DF93FE50CE4AA6F2793944 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StandUp.app/Contents/MacOS/StandUp";
+			};
+			name = Debug;
+		};
 		A9FC2F7F2A7613A80E7ABF4D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StandUp/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
+				PRODUCT_NAME = StandUp;
 				SDKROOT = macosx;
 			};
 			name = Debug;
+		};
+		BBF24A4E385BCF91F8FD8A05 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StandUp.app/Contents/MacOS/StandUp";
+			};
+			name = Release;
 		};
 		DA2EDC64CEFBF46FC0E79FD9 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -280,11 +398,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -304,19 +420,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = StandUp/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
-				PRODUCT_NAME = StandUp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -328,12 +436,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = StandUp/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
+				PRODUCT_NAME = StandUp;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -371,11 +489,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = StandUp/StandUp.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -389,18 +505,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = StandUp/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions).";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.local.standup;
-				PRODUCT_NAME = StandUp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -416,6 +524,15 @@
 			buildConfigurations = (
 				DA2EDC64CEFBF46FC0E79FD9 /* Debug */,
 				F818A84719FE11D43A31C1D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EECB8E2996D21BEA3F90F677 /* Build configuration list for PBXNativeTarget "StandUpTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				14DF93FE50CE4AA6F2793944 /* Debug */,
+				BBF24A4E385BCF91F8FD8A05 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

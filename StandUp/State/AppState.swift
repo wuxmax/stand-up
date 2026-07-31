@@ -101,9 +101,12 @@ final class AppState: ObservableObject {
         deskSettings = settings
         UserDefaults.standard.saveDeskSettings(settings)
         // Only a changed desk UUID requires reconnecting; height presets can be
-        // applied live without tearing down the BLE connection.
+        // applied live without tearing down the BLE connection. The settings UI
+        // persists the address on every keystroke, so ignore partial input:
+        // only an empty address (auto-scan) or a complete valid UUID reconnects.
         if isDeskControlEnabled {
-            if addressChanged {
+            let usableAddress = settings.deskAddress.isEmpty || UUID(uuidString: settings.deskAddress) != nil
+            if addressChanged && usableAddress {
                 restartDeskController()
             } else {
                 desk?.updateSettings(settings)

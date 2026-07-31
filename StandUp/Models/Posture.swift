@@ -25,7 +25,3 @@ enum Posture: String, Codable, CaseIterable, Sendable {
         }
     }
 }
-
-extension Posture {
-    var destinationName: String { "StandUp.posture." + rawValue }
-}

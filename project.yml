@@ -7,23 +7,12 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "2"
     SWIFT_VERSION: "5.0"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     CODE_SIGN_IDENTITY: "-"
     ENABLE_HARDENED_RUNTIME: YES
     MACOSX_DEPLOYMENT_TARGET: "14.0"
-    GENERATE_INFOPLIST_FILE: NO
-    INFOPLIST_FILE: StandUp/Info.plist
-    CODE_SIGN_ENTITLEMENTS: StandUp/StandUp.entitlements
-    PRODUCT_BUNDLE_IDENTIFIER: com.local.standup
-    PRODUCT_NAME: StandUp
-    INFOPLIST_KEY_LSUIElement: YES
-    INFOPLIST_KEY_NSHumanReadableCopyright: "MIT License"
-    INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions)."
-    INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
 targets:
   StandUp:
     type: application
@@ -35,3 +24,45 @@ targets:
           - "StandUp.entitlements"
     resources:
       - path: StandUp/Assets.xcassets
+    settings:
+      base:
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "2"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: StandUp/Info.plist
+        CODE_SIGN_ENTITLEMENTS: StandUp/StandUp.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.standup
+        PRODUCT_NAME: StandUp
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: "MIT License"
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "StandUp uses Bluetooth to control your LINAK standing desk (move to sit/stand positions)."
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+  StandUpTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: StandUpTests
+    dependencies:
+      - target: StandUp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.standup.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  StandUp:
+    build:
+      targets:
+        StandUp: all
+        StandUpTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - StandUpTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

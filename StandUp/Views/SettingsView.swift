@@ -70,7 +70,7 @@ struct SettingsView: View {
                 Toggle("Auto-move desk on interval end", isOn: autoControlBinding)
                     .disabled(!appState.isDeskControlEnabled)
                 if appState.isDeskControlEnabled && appState.autoControlDesk {
-                    Slider(value: $warningSeconds, in: 5...180, step: 5) {
+                    Slider(value: warningSecondsBinding, in: 5...60) {
                         Text("Move warning")
                     }
                     HStack {
@@ -158,6 +158,13 @@ struct SettingsView: View {
         )
     }
 
+    private var warningSecondsBinding: Binding<Double> {
+        Binding(
+            get: { warningSeconds },
+            set: { v in warningSeconds = (v / 5).rounded() * 5 }
+        )
+    }
+
     private func persistTimerSettings() {
         var s = appState.timerSettings
         s.sitInterval = round(sitMinutes) * 60
@@ -178,7 +185,7 @@ struct SettingsView: View {
     private func seedFromState() {
         sitMinutes = appState.timerSettings.sitInterval / 60
         standMinutes = appState.timerSettings.standInterval / 60
-        warningSeconds = appState.timerSettings.warningLeadTime
+        warningSeconds = min(max(appState.timerSettings.warningLeadTime, 5), 60)
         sitHeightMm = Double(appState.deskSettings.sitHeightMm)
         standHeightMm = Double(appState.deskSettings.standHeightMm)
         baseHeightMm = Double(appState.deskSettings.baseHeightMm ?? 0)

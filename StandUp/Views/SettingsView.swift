@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var standHeightMm: Double = 600
     @State private var baseHeightMm: Double = 0
     @State private var deskAddress: String = ""
+    @State private var warningSeconds: Double = 30
 
     var body: some View {
         TabView {
@@ -68,6 +69,19 @@ struct SettingsView: View {
                 Toggle("Enable desk control", isOn: deskEnabledBinding)
                 Toggle("Auto-move desk on interval end", isOn: autoControlBinding)
                     .disabled(!appState.isDeskControlEnabled)
+                if appState.isDeskControlEnabled && appState.autoControlDesk {
+                    Slider(value: $warningSeconds, in: 5...180, step: 5) {
+                        Text("Move warning")
+                    }
+                    HStack {
+                        Text("\(Int(warningSeconds)) s before the desk moves")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                        Spacer()
+                    }
+                    .onChange(of: warningSeconds) { _, _ in persistTimerSettings() }
+                }
             }
 
             Section("LINAK connection") {
@@ -148,6 +162,7 @@ struct SettingsView: View {
         var s = appState.timerSettings
         s.sitInterval = round(sitMinutes) * 60
         s.standInterval = round(standMinutes) * 60
+        s.warningLeadTime = warningSeconds
         DispatchQueue.main.async { appState.updateTimerSettings(s) }
     }
 
@@ -163,6 +178,7 @@ struct SettingsView: View {
     private func seedFromState() {
         sitMinutes = appState.timerSettings.sitInterval / 60
         standMinutes = appState.timerSettings.standInterval / 60
+        warningSeconds = appState.timerSettings.warningLeadTime
         sitHeightMm = Double(appState.deskSettings.sitHeightMm)
         standHeightMm = Double(appState.deskSettings.standHeightMm)
         baseHeightMm = Double(appState.deskSettings.baseHeightMm ?? 0)

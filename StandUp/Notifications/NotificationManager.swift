@@ -65,6 +65,23 @@ final class NotificationManager {
              posture: .sitting)
     }
 
+    func sendDeskMoveWarning(seconds: TimeInterval) {
+        let content = UNMutableNotificationContent()
+        content.title = "Desk moving soon"
+        content.body = "The desk will move automatically in \(Int(seconds.rounded())) seconds."
+        content.sound = .default
+        let request = UNNotificationRequest(
+            identifier: "StandUp.moveWarning.\(Int(Date().timeIntervalSince1970))",
+            content: content,
+            trigger: nil
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule move warning: \(error)")
+            }
+        }
+    }
+
     private func send(title: String, body: String, posture: Posture) {
         let content = UNMutableNotificationContent()
         content.title = title

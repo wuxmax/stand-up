@@ -19,6 +19,7 @@ final class AppState: ObservableObject {
     private var desk: DeskController?
     private var deskEventTask: Task<Void, Never>?
     private var tickObserver: NSObjectProtocol?
+    private var warningObserver: NSObjectProtocol?
     private var didBecomeActiveObserver: NSObjectProtocol?
 
     init() {
@@ -46,6 +47,14 @@ final class AppState: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in self?.refreshNotificationStatus() }
+        }
+        self.warningObserver = NotificationCenter.default.addObserver(
+            forName: PostureTimer.Static.warningNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in self.handleMoveWarning() }
         }
     }
 
@@ -159,6 +168,11 @@ final class AppState: ObservableObject {
         if autoControlDesk && isDeskControlEnabled {
             Task { await moveDeskToCurrentPosture() }
         }
+    }
+
+    private func handleMoveWarning() {
+        guard autoControlDesk && isDeskControlEnabled else { return }
+        notificationManager.sendDeskMoveWarning(seconds: postureTimer.remaining)
     }
 
     private func restartDeskController() {

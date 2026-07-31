@@ -13,6 +13,7 @@ final class PostureTimer: ObservableObject {
 
     private var settings: TimerSettings
     private var timer: Timer?
+    private var warningFired = false
     private let intervalGranularity: TimeInterval = 1.0
 
     init(settings: TimerSettings) {
@@ -31,6 +32,7 @@ final class PostureTimer: ObservableObject {
     func start() {
         guard runState != .running else { return }
         runState = .running
+        warningFired = false
         scheduleTick()
     }
 
@@ -46,12 +48,14 @@ final class PostureTimer: ObservableObject {
         timer = nil
         runState = .idle
         posture = .sitting
+        warningFired = false
         remaining = settings.interval(for: posture)
     }
 
     func switchMode() {
         posture = posture.opposite
         remaining = settings.interval(for: posture)
+        warningFired = false
         if runState == .running {
             scheduleTick()
         }
@@ -71,6 +75,17 @@ final class PostureTimer: ObservableObject {
         remaining -= intervalGranularity
         if remaining <= 0 {
             onComplete()
+            return
+        }
+        if !warningFired,
+           settings.warningLeadTime > 0,
+           remaining <= settings.warningLeadTime {
+            warningFired = true
+            NotificationCenter.default.post(
+                name: Static.warningNotification,
+                object: nil,
+                userInfo: ["posture": posture]
+            )
         }
     }
 
@@ -79,6 +94,7 @@ final class PostureTimer: ObservableObject {
         timer = nil
         posture = posture.opposite
         remaining = settings.interval(for: posture)
+        warningFired = false
         NotificationCenter.default.post(
             name: Static.tickCompleteNotification,
             object: nil,
@@ -91,5 +107,6 @@ final class PostureTimer: ObservableObject {
 
     enum Static {
         static let tickCompleteNotification = Notification.Name("StandUp.timer.tickComplete")
+        static let warningNotification = Notification.Name("StandUp.timer.warning")
     }
 }

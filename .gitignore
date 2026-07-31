@@ -16,6 +16,9 @@ StandUp.xcodeproj/project.xcworkspace/xcuserdata/
 # macOS
 .DS_Store
 
+# Python
+__pycache__/
+
 # SwiftPM
 .swiftpm/
 Package.resolved

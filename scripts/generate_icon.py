@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Generate the StandUp app icon PNGs (pure stdlib: zlib + struct)."""
+"""Generate the StandUp app icon PNGs (pure stdlib: zlib + struct).
+
+Design: a bold white up-arrow rising from a desk surface, on the accent-blue
+rounded square. Edges are anti-aliased via supersampling (no Pillow).
+"""
 import os
 import struct
 import zlib
@@ -16,9 +20,11 @@ SIZES = {
     "icon_1024.png": 1024,
 }
 
-# Accent orange from AccentColor.colorset (sRGB ~0.176, 0.510, 0.894)
+# Accent orange-blue from AccentColor.colorset (sRGB ~0.176, 0.510, 0.894).
 BG = (45, 130, 228)
 FG = (255, 255, 255)
+
+SS = 4  # supersampling factor for anti-aliasing
 
 
 def write_png(path, width, height, rgba_rows):
@@ -37,53 +43,86 @@ def write_png(path, width, height, rgba_rows):
         f.write(chunk(b"IEND", b""))
 
 
-def in_rounded_rect(x, y, w, h, r):
-    # Returns True if (x,y) is inside a rounded rect of size w x h with corner radius r.
-    if x < r and y < r:
-        return (r - x) ** 2 + (r - y) ** 2 <= r * r
-    if x >= w - r and y < r:
-        return (x - (w - r - 1)) ** 2 + (r - y) ** 2 <= r * r
-    if x < r and y >= h - r:
-        return (r - x) ** 2 + (y - (h - r - 1)) ** 2 <= r * r
-    if x >= w - r and y >= h - r:
-        return (x - (w - r - 1)) ** 2 + (y - (h - r - 1)) ** 2 <= r * r
-    return True
+# --- shape tests (32-unit design grid, y down, origin top-left) ---
+
+def inside_rounded_rect(x, y, x0, y0, x1, y1, r):
+    if x < x0 or x > x1 or y < y0 or y > y1:
+        return False
+    cx = min(max(x, x0 + r), x1 - r)
+    cy = min(max(y, y0 + r), y1 - r)
+    dx = x - cx
+    dy = y - cy
+    return dx * dx + dy * dy <= r * r
+
+
+def _sign(px, py, ax, ay, bx, by):
+    return (px - bx) * (ay - by) - (ax - bx) * (py - by)
+
+
+def inside_triangle(x, y, ax, ay, bx, by, cx, cy):
+    d1 = _sign(x, y, ax, ay, bx, by)
+    d2 = _sign(x, y, bx, by, cx, cy)
+    d3 = _sign(x, y, cx, cy, ax, ay)
+    has_neg = d1 < 0 or d2 < 0 or d3 < 0
+    has_pos = d1 > 0 or d2 > 0 or d3 > 0
+    return not (has_neg and has_pos)
+
+
+def inside_rect(x, y, x0, y0, x1, y1):
+    return x0 <= x <= x1 and y0 <= y <= y1
+
+
+def pixel_color(x, y):
+    """Return (r, g, b, a) at design coordinate (x, y) in the 32-unit grid."""
+    # Background: full-bleed rounded square, corner radius 8.
+    if not inside_rounded_rect(x, y, 0, 0, 32, 32, 8):
+        return (0, 0, 0, 0)
+    r, g, b = BG
+
+    # Desk surface: a white rounded bar near the bottom.
+    if inside_rounded_rect(x, y, 4, 25, 28, 28, 1.5):
+        r, g, b = FG
+
+    # Up arrow (white), apex near the top, shaft rising from just above the desk.
+    # Head triangle.
+    if inside_triangle(x, y, 16, 6, 7, 15, 25, 15):
+        r, g, b = FG
+    # Shaft.
+    if inside_rect(x, y, 13, 15, 19, 23):
+        r, g, b = FG
+    # Blend the shaft into the head base smoothly (overlap is fine; both white).
+
+    return (r, g, b, 255)
 
 
 def render(px):
-    """Render the icon at px x px. Design grid is 32 units."""
-    u = px / 32.0
-    r = px * 0.22
+    """Render the icon at px x px, anti-aliased via SS-fold supersampling."""
+    sub = px * SS
+    scale = 32.0 / sub
     rows = []
-    for y in range(px):
+    for oy in range(px):
         row = bytearray()
-        for x in range(px):
-            if not in_rounded_rect(x, y, px, px, r):
-                row += bytes((0, 0, 0, 0))
-                continue
-            # Decide glyph pixels. Use a simple "standing figure + up arrow".
-            col = BG
-            # Head
-            hx0, hx1 = 13 * u, 18 * u
-            hy0, hy1 = 24 * u, 28 * u
-            if hx0 <= x < hx1 and hy0 <= y < hy1:
-                col = FG
-            # Body
-            bx0, bx1 = 13 * u, 19 * u
-            by0, by1 = 12 * u, 22 * u
-            if bx0 <= x < bx1 and by0 <= y < by1:
-                col = FG
-            # Legs
-            if 13 * u <= x < 15.5 * u and 4 * u <= y < 12 * u:
-                col = FG
-            if 16.5 * u <= x < 19 * u and 4 * u <= y < 12 * u:
-                col = FG
-            # Up arrow
-            if 24 * u <= x < 28 * u and 22 * u <= y < 25 * u:
-                col = FG
-            if 25.2 * u <= x < 26.8 * u and 25 * u <= y < 28 * u:
-                col = FG
-            row += bytes((col[0], col[1], col[2], 255))
+        for ox in range(px):
+            sr = sg = sb = sa = 0
+            for j in range(SS):
+                gy = (oy * SS + j + 0.5) * scale
+                for i in range(SS):
+                    gx = (ox * SS + i + 0.5) * scale
+                    r, g, b, a = pixel_color(gx, gy)
+                    # premultiplied accumulate
+                    sr += r * a
+                    sg += g * a
+                    sb += b * a
+                    sa += a
+            n = SS * SS
+            if sa > 0:
+                r = sr // sa
+                g = sg // sa
+                b = sb // sa
+                a = sa // n
+            else:
+                r = g = b = a = 0
+            row += bytes((r, g, b, a))
         rows.append(bytes(row))
     return rows
 

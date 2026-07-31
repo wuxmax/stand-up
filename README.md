@@ -8,13 +8,14 @@ The LINAK Bluetooth protocol implementation is a native Swift port of [rhyst/lin
 
 ## Status
 
-- Menu-bar timer, sit/stand intervals, start/pause, reset, switch-mode, native notifications at interval end.
-- LINAK desk control over Bluetooth: connect, live height display, manual up/down jog, and preset sit/stand heights.
+- Menu-bar timer with configurable sit/stand intervals; start/pause, reset, and switch-mode controls plus a live countdown in the menu bar.
+- Native notifications at interval end, plus an optional pre-move warning notification a few seconds before the desk auto-moves.
+- LINAK desk control over Bluetooth — **validated on real hardware**: connect via saved UUID or auto-scan, live height display, manual up/down jog (hold the buttons or use the ↑/↓ arrow keys), sit/stand presets (editable, or captured from the current height), and automatic moves when an interval ends.
 
 ## Requirements
 
 - macOS 14 (Sonoma) or newer
-- Xcode 15+ (Command Line Tools are not enough to build a SwiftUI `.app`)
+- Xcode 15+ (Command Line Tools alone cannot build a SwiftUI `.app`)
 - `xcodegen` (to regenerate the project): `brew install xcodegen`
 
 ## Build & run
@@ -26,7 +27,21 @@ open StandUp.xcodeproj
 
 Then in Xcode: select the **StandUp** scheme and press ⌘R. The app lives in the menu bar (no Dock icon, `LSUIElement`).
 
-To regenerate after adding/removing files, re-run `xcodegen generate`.
+A shared scheme is committed, so the command line works on a fresh checkout too:
+
+```sh
+xcodebuild -project StandUp.xcodeproj -scheme StandUp build
+```
+
+To regenerate after adding/removing files, re-run `xcodegen generate` and commit the regenerated `StandUp.xcodeproj/`.
+
+## Tests
+
+Unit tests (`StandUpTests/`) cover the LINAK byte packing, the settings models, and the posture-timer state machine:
+
+```sh
+xcodebuild -project StandUp.xcodeproj -scheme StandUp test
+```
 
 ## App icon
 
@@ -40,23 +55,23 @@ python3 scripts/generate_icon.py
 
 - `StandUpApp` hosts a `MenuBarExtra` (the popover UI). Settings are shown in a separate `NSWindow` managed by `SettingsWindowController` (SwiftUI's `Settings` scene doesn't work reliably for `LSUIElement` apps).
 - `AppState` (`@MainActor`) owns `TimerSettings`, `DeskSettings`, a `PostureTimer`, the notification manager, and an optional `DeskController`.
-- `PostureTimer` ticks every second; on interval completion it posts a `Notification` and `AppState` fires a sit/stand user notification (and, if enabled, moves the desk).
+- `PostureTimer` ticks every second; on interval completion it posts a `Notification`, and `AppState` fires a sit/stand user notification (and, if enabled, moves the desk). A separate warning notification can fire a configurable number of seconds before an auto-move.
 - Settings persist to `UserDefaults`.
 - The desk layer is behind the `DeskController` protocol; the sole implementation is `LinakDeskController` (CoreBluetooth).
 
-## LINAK integration (iteration 2)
+## LINAK integration
 
-The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhyst/linak-controller`'s protocol:
+The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhyst/linak-controller`'s protocol, validated against a real LINAK desk (connect, DPG handshake, live height, jog, and sit/stand presets all verified working).
 
 - `LinakGATT.swift` — GATT service/characteristic UUIDs and byte packing (Reference Input/Output, Control, DPG).
-- `LinakDeskController.swift` — `CBCentralManager`/`CBPeripheral` flow: connect, discover services, subscribe to Reference Output for live height/speed, and a move loop that repeatedly writes the target height to Reference Input until speed reaches 0.
+- `LinakDeskController.swift` — `CBCentralManager`/`CBPeripheral` flow: connect (by UUID or auto-scan), discover services, run the DPG init handshake (capabilities, set user-id byte to 1, read base offset), subscribe to Reference Output for live height/speed, and a move loop that repeatedly writes the target height to Reference Input until the reported speed reaches 0.
 
 ### Setup for a real desk
 
-1. Pair your desk in **System Settings → Bluetooth** first (the desk must be paired but not necessarily connected).
-2. Find the desk's **UUID** (macOS uses a UUID, not a MAC address). You can get it from `linak-controller --scan` or from an app like [Bluetility](https://github.com/jnross/Bluetility).
-3. Open StandUp's **Settings → Desk**, enable **Desk control**, pick **LINAK (Bluetooth)**, paste the UUID, and set your sit/stand favourite heights (mm above the floor). Base height can be left "auto" (read from the desk) or set manually.
-4. Enable **Auto-move desk on interval end** if you want the desk to move automatically when each interval finishes, or use the **Move desk** button in the popover.
+1. Enable **Desk control** in **Settings → Desk**. Leave the UUID blank to auto-scan for a nearby LINAK desk, or paste a specific desk's **UUID** (macOS uses a UUID, not a MAC address — find it via `linak-controller --scan` or an app like [Bluetility](https://github.com/jnross/Bluetility)). The address field applies a reconnect only once it contains a complete, valid UUID (or is cleared), so typing an address by hand won't thrash the connection.
+2. Set your sit/stand favourite heights (mm above the floor). Base height can be left "auto" (read from the desk during the handshake) or set manually. You can also jog the desk to a comfortable position and press **Set current** on a preset card.
+3. Enable **Auto-move desk on interval end** if you want the desk to move automatically when each interval finishes (a warning notification fires shortly before), or use the jog/preset controls in the popover.
+4. Grant **Bluetooth permission** when macOS asks on first connect (the app is sandboxed with `com.apple.security.device.bluetooth`).
 
 ### Height semantics (matches the Python reference)
 
@@ -64,11 +79,12 @@ The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhys
 - Favourite/stand heights in the UI are **millimetres above the floor**.
 - Conversion: `internal = (targetMm - baseHeightMm) * 10`; `humanMm = (internal / 10) + baseHeightMm`.
 - Speed is in **hundredths of a mm/s** on the wire.
+- Control commands (wakeup/stop/up/down) are written as two bytes `[cmd, 0]`; `stop = 255`.
 
 ### Caveats
 
-- The LINAK driver is not yet hardware-validated. Treat it as a starting point: the GATT layout and byte packing follow the reference, but real desks sometimes need tweaks (e.g. the DPG user-id byte must be `1` on the DPG1C). The DPG init handshake (capabilities/user-id/base-offset) present in the Python version is **not yet implemented** here — only the connect/move/notify path is.
-- On macOS you must grant **Bluetooth permission** the first time the app tries to connect (the app is sandboxed with `com.apple.security.device.bluetooth`).
+- Validated against one desk model so far; other LINAK models/revisions may need tweaks (the GATT layout follows the reference implementation).
+- Auto-scan connects to the first desk it finds; use an explicit UUID if several desks are nearby.
 
 ## Project layout
 
@@ -79,8 +95,8 @@ StandUp/
   StandUp.entitlements          # sandbox + Bluetooth
   Models/
     Posture.swift               # .sitting / .standing
-    TimerSettings.swift         # sit/stand interval durations
-    PostureTimer.swift          # 1s tick timer, switch-mode, completion
+    TimerSettings.swift         # sit/stand interval durations + move-warning lead time
+    PostureTimer.swift          # 1s tick timer, switch-mode, warning + completion
   Notifications/
     NotificationManager.swift   # UNUserNotificationCenter wrappers
   Desk/
@@ -95,14 +111,30 @@ StandUp/
   Views/
     MenuBarContentView.swift     # popover
     TimerControlsView.swift      # start/pause, reset, switch
-    StatusBarLabelView.swift     # tiny menu-bar label
-    DeskStatusRow.swift          # connection/height/moving indicator
+    StatusBarLabelView.swift     # tiny menu-bar label (pre-rendered NSImage)
+    DeskControlView.swift        # connection status, jog buttons/keys, presets
     SettingsView.swift           # Timer + Desk tabs
   Assets.xcassets/              # AppIcon + AccentColor
-project.yml                     # xcodegen spec
+StandUpTests/                   # XCTest unit tests
+project.yml                     # xcodegen spec (targets + shared scheme)
 scripts/generate_icon.py        # regenerates icon PNGs (stdlib only)
+LICENSE                         # MIT
 ```
+
+## Known issues & limitations
+
+Documented for transparency; none affect normal daily use.
+
+- `LinakDeskController` is not actor-isolated: move/jog tasks read height/speed state from background threads while BLE callbacks mutate it on the main queue. Benign in practice (Int-sized reads/writes); a proper actor refactor is deferred.
+- No automatic reconnect after an unexpected Bluetooth disconnect — toggle desk control off/on to reconnect.
+- The 1s `Timer` tick can drift slightly over long intervals (no tolerance is set).
+- Version numbers live in both `project.yml` and the hand-maintained `Info.plist` and can drift (the plist literals win).
+- The move-warning lead time cannot be disabled from the UI (the slider clamps to 5–60 s), even though `TimerSettings` supports `0` = off.
+- The move warning fires based on timer state alone, even if the desk is disconnected or already at the target height.
+- Out of scope for now: launch-at-login, CI, multi-desk selection during auto-scan, automatic updates.
 
 ## License
 
-MIT.
+MIT — see [LICENSE](LICENSE).
+
+

@@ -152,7 +152,13 @@ final class LinakDeskController: NSObject, DeskController {
         }
         jogTask?.cancel()
         jogTask = nil
-        moveTask?.cancel()
+
+        let previous = moveTask
+        previous?.cancel()
+        if previous != nil {
+            writeCommand(.stop)
+            await previous?.value
+        }
 
         let targetMm = settings.targetHeightMm(for: target)
         let baseMm = resolvedBaseMm()
@@ -176,23 +182,30 @@ final class LinakDeskController: NSObject, DeskController {
 
         let periodNs = UInt64(max(50_000_000, Int(settings.moveCommandPeriod * 1_000_000_000)))
         let maxIters = Int(60.0 / max(0.1, settings.moveCommandPeriod)) + 2
+        let stalledLimit = max(4, Int(4.0 / max(0.1, settings.moveCommandPeriod)))
         moveTask = Task { [weak self] in
             guard let self else { return }
-            var hasStartedMoving = false
-            var zeroCount = 0
             var iters = 0
+            var stalled = 0
+            var reachedCount = 0
             while !Task.isCancelled {
                 self.writeReferenceInput(internalTarget)
                 try? await Task.sleep(nanoseconds: periodNs)
                 let speed = self.lastSpeedInternal
-                if speed != 0 {
-                    hasStartedMoving = true
-                    zeroCount = 0
-                } else if hasStartedMoving {
-                    zeroCount += 1
+                let height = self.lastHeightInternal
+                let atTarget = abs(height - internalTarget) <= 5
+                if atTarget && speed == 0 {
+                    reachedCount += 1
+                    if reachedCount >= 2 { break }
+                } else {
+                    reachedCount = 0
                 }
-                if hasStartedMoving && zeroCount >= 2 { break }
-                if !hasStartedMoving && iters >= 3 { break }
+                if speed == 0 && !atTarget {
+                    stalled += 1
+                    if stalled >= stalledLimit { break }
+                } else {
+                    stalled = 0
+                }
                 iters += 1
                 if iters >= maxIters { break }
             }
@@ -381,7 +394,8 @@ final class LinakDeskController: NSObject, DeskController {
         reconnectTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             guard !Task.isCancelled else { return }
-            await MainActor.run { self?.reconnectIfNeeded() }
+            guard let self else { return }
+            await MainActor.run { self.reconnectIfNeeded() }
         }
     }
 

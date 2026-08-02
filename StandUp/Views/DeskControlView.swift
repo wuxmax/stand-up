@@ -13,15 +13,15 @@ struct DeskControlView: View {
                 HStack(alignment: .center, spacing: 16) {
                     jogColumn
                     VStack(spacing: 8) {
-                        presetCard(label: "Sit", heightMm: appState.deskSettings.sitHeightMm) {
-                            Task { await appState.moveDesk(to: .sit) }
-                        } onSet: {
-                            appState.setSitPresetToCurrentHeight()
-                        }
                         presetCard(label: "Stand", heightMm: appState.deskSettings.standHeightMm) {
                             Task { await appState.moveDesk(to: .stand) }
                         } onSet: {
                             appState.setStandPresetToCurrentHeight()
+                        }
+                        presetCard(label: "Sit", heightMm: appState.deskSettings.sitHeightMm) {
+                            Task { await appState.moveDesk(to: .sit) }
+                        } onSet: {
+                            appState.setSitPresetToCurrentHeight()
                         }
                     }
                 }
@@ -58,18 +58,20 @@ struct DeskControlView: View {
                 appState.stopDesk()
             }
 
-            if let h = appState.deskSnapshot.heightMm {
-                Text("\(h)")
-                    .font(.system(.title2, design: .monospaced).weight(.semibold))
-                    .monospacedDigit()
-            } else {
-                Text("--")
-                    .font(.system(.title2, design: .monospaced).weight(.semibold))
+            VStack(spacing: 0) {
+                if let h = appState.deskSnapshot.heightMm {
+                    Text("\(h)")
+                        .font(.system(.title2, design: .monospaced).weight(.semibold))
+                        .monospacedDigit()
+                } else {
+                    Text("--")
+                        .font(.system(.title2, design: .monospaced).weight(.semibold))
+                        .foregroundStyle(Color.secondary)
+                }
+                Text("mm")
+                    .font(.caption2)
                     .foregroundStyle(Color.secondary)
             }
-            Text("mm")
-                .font(.caption2)
-                .foregroundStyle(Color.secondary)
 
             JogButton(systemName: "arrow.down") {
                 appState.jogDeskDown()

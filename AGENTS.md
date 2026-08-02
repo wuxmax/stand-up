@@ -38,6 +38,14 @@ Height semantics: on-wire value is **tenths of a mm relative to base height**; U
 
 The pending DPG response continuation is held in `DPGContinuationBox` (a small `@unchecked Sendable` box) so the response-timeout closure captures the box instead of the non-Sendable controller — keep it that way to stay warning-free under strict concurrency.
 
+**Reconnect & wake recovery.** The controller auto-recovers the link instead of leaving the UI stuck at "Bluetooth is powered off" (the classic symptom after the Mac sleeps). Keep these invariants when touching `LinakDeskController`:
+- `centralManagerDidUpdateState(.poweredOn)` calls `reconnectIfNeeded()` (no `peripheral == nil` guard) — it must reconnect whenever not already connected/connecting/scanning. `.poweredOff`/`.unauthorized`/`.unsupported` must call `resetLinkState()` before surfacing the error so a later `.poweredOn` re-runs the full DPG handshake from scratch.
+- `didDisconnectPeripheral`/`didFailToConnect` call `resetLinkState()` + `scheduleReconnect()` (exponential backoff, 2 s → 30 s cap, unbounded retries) — they are the source of automatic link-drop recovery. `reconnectAttempts` resets to 0 only on a successful `.connected` (in `didDiscoverCharacteristicsFor`).
+- `disconnect()` (teardown on disable) sets `isTearingDown = true` and the disconnect/fail callbacks `guard !isTearingDown` so they don't schedule a reconnect for a controller the user just disabled. Don't remove that guard.
+- `handleSystemWake()` (registered via `NSWorkspace.didWakeNotification` in `init`, removed in `disconnect()`/`deinit`) forces a reconnect on wake when no BLE event fires. It nils `self.peripheral` first; the disconnect/fail callbacks use **object identity** (`peripheral === self.peripheral`) so a late `didDisconnect` queued from the pre-sleep link can't clobber the fresh reconnect attempt. Keep that identity check.
+- `scheduleReconnect`'s `Task` hops back to `MainActor.run` before calling `reconnectIfNeeded()` — the controller is not `@MainActor`, so `Task.sleep` resumes off the main queue and all BLE-state mutation must stay on `.main` (the central's delegate queue). Don't drop that hop.
+- `resetLinkState()` is a *light* teardown: it clears characteristics + `didStartHandshake` and cancels move/jog tasks, but does **not** nil `peripheral` or cancel the central connection (the system already reports the link gone). Only `disconnect()` / `handleSystemWake` nil `peripheral`.
+
 ## Conventions
 
 - Swift, no third-party dependencies. Do not add SPM dependencies without asking.
@@ -53,5 +61,6 @@ The pending DPG response continuation is held in `DPGContinuationBox` (a small `
 3. `xcodebuild -project StandUp.xcodeproj -scheme StandUp test` is green.
 4. Run (⌘R): confirm the menu-bar item appears, Start/Pause/Reset/Switch work, and a sit↔stand notification fires when an interval elapses.
 5. In Settings → Desk, enable desk control and connect to a real LINAK desk: confirm the DPG handshake logs `user-id=1`, jog up/down moves the desk continuously while held and stops on release, and sit/stand presets move the desk with no lockout / bricking across repeated cycles (physical panel buttons stay responsive).
+6. Put the Mac to sleep, wake it, and confirm the desk section recovers automatically (`Bluetooth is powered off` → `Connecting...` → `Connected`) and live height/jog/presets work again without toggling desk control off/on. Power-cycling the desk should likewise trigger an automatic reconnect.
 
 

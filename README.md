@@ -10,7 +10,7 @@ The LINAK Bluetooth protocol implementation is a native Swift port of [rhyst/lin
 
 - Menu-bar timer with configurable sit/stand intervals; start/pause, reset, and switch-mode controls plus a live countdown in the menu bar.
 - Native notifications at interval end, plus an optional pre-move warning notification a few seconds before the desk auto-moves.
-- LINAK desk control over Bluetooth — **validated on real hardware**: connect via saved UUID or auto-scan, live height display, manual up/down jog (hold the buttons or use the ↑/↓ arrow keys), sit/stand presets (editable, or captured from the current height), and automatic moves when an interval ends.
+- LINAK desk control over Bluetooth — **validated on real hardware**: connect via saved UUID or auto-scan, live height display, manual up/down jog (hold the buttons or use the ↑/↓ arrow keys), sit/stand presets (editable, or captured from the current height), and automatic moves when an interval ends. The connection survives Mac sleep/wake and Bluetooth power cycles: it automatically reconnects with exponential backoff when the link drops, the desk is power-cycled, or the Mac wakes from sleep.
 
 ## Requirements
 
@@ -65,6 +65,15 @@ The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhys
 
 - `LinakGATT.swift` — GATT service/characteristic UUIDs and byte packing (Reference Input/Output, Control, DPG).
 - `LinakDeskController.swift` — `CBCentralManager`/`CBPeripheral` flow: connect (by UUID or auto-scan), discover services, run the DPG init handshake (capabilities, set user-id byte to 1, read base offset), subscribe to Reference Output for live height/speed, and a move loop that repeatedly writes the target height to Reference Input until the reported speed reaches 0.
+
+### Connection resilience & auto-reconnect
+
+The desk link is designed to recover on its own, so you don't have to toggle desk control off/on after the Mac sleeps or the desk is power-cycled:
+
+- On an unexpected disconnect or failed connect, it retries with **exponential backoff** (2 s → 4 s → 8 s → … capped at 30 s), retrying indefinitely so the desk reconnects whenever it's back in range.
+- When **Bluetooth powers off** (e.g. around sleep), link state is reset so the next `.poweredOn` cleanly reconnects and re-runs the full DPG handshake.
+- On **system wake**, an `NSWorkspace.didWakeNotification` observer forces a fresh reconnect in case no CoreBluetooth event fires — this fixes the "Bluetooth is powered off" stuck state that could otherwise appear after the Mac had been idle/asleep.
+- The reconnect logic is idempotent and guarded against teardown (an explicit disable stops reconnect attempts) and stale peripheral callbacks (object-identity checked), so a late `didDisconnect` from a pre-sleep link can't clobber a new connection attempt.
 
 ### Setup for a real desk
 
@@ -126,7 +135,6 @@ LICENSE                         # MIT
 Documented for transparency; none affect normal daily use.
 
 - `LinakDeskController` is not actor-isolated: move/jog tasks read height/speed state from background threads while BLE callbacks mutate it on the main queue. Benign in practice (Int-sized reads/writes); a proper actor refactor is deferred.
-- No automatic reconnect after an unexpected Bluetooth disconnect — toggle desk control off/on to reconnect.
 - The 1s `Timer` tick can drift slightly over long intervals (no tolerance is set).
 - Version numbers live in both `project.yml` and the hand-maintained `Info.plist` and can drift (the plist literals win).
 - The move-warning lead time cannot be disabled from the UI (the slider clamps to 5–60 s), even though `TimerSettings` supports `0` = off.

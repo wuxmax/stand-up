@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import CoreBluetooth
 
@@ -27,11 +28,36 @@ final class LinakDeskController: NSObject, DeskController {
     private var baseOffsetMm: Int?
     private var didStartHandshake = false
 
+    private var reconnectTask: Task<Void, Never>?
+    private var reconnectAttempts = 0
+    private var wakeObserver: NSObjectProtocol?
+    private var isTearingDown = false
+
+    private let initialReconnectDelay: TimeInterval = 2
+    private let maxReconnectDelay: TimeInterval = 30
+
     init(settings: DeskSettings) {
         self.settings = settings
         self.central = CBCentralManager(delegate: nil, queue: .main)
         super.init()
         self.central.delegate = self
+        self.wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            assert(Thread.isMainThread)
+            self?.handleSystemWake()
+        }
+    }
+
+    deinit {
+        reconnectTask?.cancel()
+        reconnectTask = nil
+        if let o = wakeObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(o)
+            wakeObserver = nil
+        }
     }
 
     func connect() async {
@@ -39,7 +65,7 @@ final class LinakDeskController: NSObject, DeskController {
             update(connection: .error("Bluetooth not powered on"))
             return
         }
-        startConnection()
+        reconnectIfNeeded()
     }
 
     private func startConnection() {
@@ -85,12 +111,16 @@ final class LinakDeskController: NSObject, DeskController {
     }
 
     func disconnect() {
+        isTearingDown = true
         moveTask?.cancel()
         moveTask = nil
         jogTask?.cancel()
         jogTask = nil
         scanTimeoutTask?.cancel()
         scanTimeoutTask = nil
+        reconnectTask?.cancel()
+        reconnectTask = nil
+        reconnectAttempts = 0
         dpgBox.continuation?.resume(throwing: CancellationError())
         dpgBox.continuation = nil
         dpgSubscribed = false
@@ -104,6 +134,10 @@ final class LinakDeskController: NSObject, DeskController {
         controlErrorChar = nil
         baseOffsetMm = nil
         didStartHandshake = false
+        if let o = wakeObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(o)
+            wakeObserver = nil
+        }
         update(connection: .disconnected)
     }
 
@@ -301,6 +335,70 @@ final class LinakDeskController: NSObject, DeskController {
         }
     }
 
+    private func resetLinkState() {
+        moveTask?.cancel()
+        moveTask = nil
+        jogTask?.cancel()
+        jogTask = nil
+        dpgBox.continuation?.resume(throwing: CancellationError())
+        dpgBox.continuation = nil
+        dpgSubscribed = false
+        referenceInputChar = nil
+        referenceOutputChar = nil
+        controlCommandChar = nil
+        dpgChar = nil
+        controlErrorChar = nil
+        didStartHandshake = false
+    }
+
+    private func reconnectIfNeeded() {
+        guard !isTearingDown, central.state == .poweredOn else { return }
+        if isScanning { return }
+        switch snapshot.connection {
+        case .connected, .connecting, .scanning:
+            return
+        default:
+            break
+        }
+        reconnectAttempts = 0
+        reconnectTask?.cancel()
+        reconnectTask = nil
+        if peripheral != nil {
+            update(connection: .connecting)
+            central.connect(peripheral!, options: nil)
+        } else {
+            startConnection()
+        }
+    }
+
+    private func scheduleReconnect() {
+        guard !isTearingDown else { return }
+        reconnectTask?.cancel()
+        let attempt = reconnectAttempts
+        let delay = min(maxReconnectDelay, initialReconnectDelay * pow(2.0, Double(attempt)))
+        reconnectAttempts += 1
+        log("Reconnecting in \(Int(delay))s (attempt \(attempt + 1))...")
+        reconnectTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            await MainActor.run { self?.reconnectIfNeeded() }
+        }
+    }
+
+    private func handleSystemWake() {
+        switch snapshot.connection {
+        case .connected, .connecting, .scanning:
+            return
+        default:
+            break
+        }
+        log("System woke from sleep — re-establishing desk link")
+        resetLinkState()
+        peripheral = nil
+        update(connection: .disconnected)
+        reconnectIfNeeded()
+    }
+
     private func update(connection: DeskConnectionState) {
         snapshot = DeskSnapshot(
             heightMm: snapshot.heightMm,
@@ -322,12 +420,15 @@ extension LinakDeskController: CBCentralManagerDelegate {
         switch central.state {
         case .poweredOn:
             log("Bluetooth powered on")
-            if peripheral == nil && !isScanning { startConnection() }
+            reconnectIfNeeded()
         case .poweredOff:
+            resetLinkState()
             update(connection: .error("Bluetooth is powered off"))
         case .unauthorized:
+            resetLinkState()
             update(connection: .error("Bluetooth permission denied"))
         case .unsupported:
+            resetLinkState()
             update(connection: .error("Bluetooth unsupported on this Mac"))
         default:
             break
@@ -365,12 +466,21 @@ extension LinakDeskController: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        guard !isTearingDown else { return }
+        guard peripheral === self.peripheral else { return }
         log("Disconnected: \(error?.localizedDescription ?? "no error")")
+        resetLinkState()
         update(connection: .disconnected)
+        scheduleReconnect()
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        guard !isTearingDown else { return }
+        guard peripheral === self.peripheral else { return }
+        log("Failed to connect: \(error?.localizedDescription ?? "unknown")")
+        resetLinkState()
         update(connection: .error("Failed to connect: \(error?.localizedDescription ?? "unknown")"))
+        scheduleReconnect()
     }
 }
 
@@ -411,6 +521,7 @@ extension LinakDeskController: CBPeripheralDelegate {
                 guard let self else { return }
                 await self.performDPGHandshake()
                 if let c = self.referenceOutputChar { self.peripheral?.readValue(for: c) }
+                self.reconnectAttempts = 0
                 self.update(connection: .connected)
             }
         }

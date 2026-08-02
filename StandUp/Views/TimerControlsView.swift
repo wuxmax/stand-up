@@ -5,7 +5,7 @@ struct TimerControlsView: View {
     let onSwitchMode: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack {
             Button {
                 toggleStartPause()
             } label: {
@@ -13,12 +13,16 @@ struct TimerControlsView: View {
             }
             .buttonStyle(.bordered)
 
+            Spacer()
+
             Button {
                 postureTimer.reset()
             } label: {
                 Label("Reset", systemImage: "arrow.counterclockwise")
             }
             .buttonStyle(.bordered)
+
+            Spacer()
 
             Button {
                 onSwitchMode()

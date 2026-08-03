@@ -23,6 +23,8 @@ final class LinakDeskController: NSObject, DeskController {
     private var jogTask: Task<Void, Never>?
     private var lastHeightInternal: Int = 0
     private var lastSpeedInternal: Int = 0
+    private var lastHeightUpdateAt: Date?
+    private var refOutputReadSupported = false
 
     private var dpgSubscribed = false
     private let dpgBox = DPGContinuationBox()
@@ -136,6 +138,8 @@ final class LinakDeskController: NSObject, DeskController {
         controlErrorChar = nil
         baseOffsetMm = nil
         didStartHandshake = false
+        lastHeightUpdateAt = nil
+        refOutputReadSupported = false
         if let o = wakeObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(o)
             wakeObserver = nil
@@ -167,7 +171,7 @@ final class LinakDeskController: NSObject, DeskController {
         )
         notify(.snapshot(snapshot))
 
-        if abs(lastHeightInternal - internalTarget) <= 5 {
+        if abs(lastHeightInternal - internalTarget) <= 5, isHeightDataFresh {
             moveTask?.cancel()
             moveTask = nil
             writeCommand(.stop)
@@ -185,40 +189,42 @@ final class LinakDeskController: NSObject, DeskController {
         writeCommand(.stop)
 
         let periodNs = UInt64(max(50_000_000, Int(settings.moveCommandPeriod * 1_000_000_000)))
-        let maxIters = Int(60.0 / max(0.1, settings.moveCommandPeriod)) + 2
-        let stalledLimit = max(4, Int(4.0 / max(0.1, settings.moveCommandPeriod)))
+        let maxDuration: TimeInterval = 60
         let task = Task { [weak self] in
             guard let self else { return }
-            var iters = 0
-            var stalled = 0
-            var reachedCount = 0
             var trackedTarget = self.moveTargetInternal
+            var lastLoggedHeight = Int.min
+            var consecutiveArrived = 0
+            var silenceLogged = false
+            let startedAt = Date()
             while !Task.isCancelled {
                 let currentTarget = self.moveTargetInternal
                 if currentTarget != trackedTarget {
                     trackedTarget = currentTarget
-                    stalled = 0
-                    reachedCount = 0
+                    consecutiveArrived = 0
                 }
                 self.writeReferenceInput(currentTarget)
                 try? await Task.sleep(nanoseconds: periodNs)
-                let speed = self.lastSpeedInternal
-                let height = self.lastHeightInternal
-                let atTarget = abs(height - currentTarget) <= 5
-                if atTarget && speed == 0 {
-                    reachedCount += 1
-                    if reachedCount >= 2 { break }
-                } else {
-                    reachedCount = 0
+                guard let (height, speed) = await self.pollHeightSpeed() else {
+                    if !silenceLogged {
+                        silenceLogged = true
+                        self.log("Desk not reporting height — waiting for it to respond...")
+                    }
+                    if Date().timeIntervalSince(startedAt) > maxDuration { break }
+                    continue
                 }
-                if speed == 0 && !atTarget {
-                    stalled += 1
-                    if stalled >= stalledLimit { break }
-                } else {
-                    stalled = 0
+                silenceLogged = false
+                if height != lastLoggedHeight {
+                    lastLoggedHeight = height
+                    self.log("Height: \((height / 10) + self.resolvedBaseMm())mm Speed: \(speed / 100)mm/s")
                 }
-                iters += 1
-                if iters >= maxIters { break }
+                if speed == 0 && abs(height - currentTarget) <= 5 {
+                    consecutiveArrived += 1
+                    if consecutiveArrived >= 2 { break }
+                } else {
+                    consecutiveArrived = 0
+                }
+                if Date().timeIntervalSince(startedAt) > maxDuration { break }
             }
             if Task.isCancelled { return }
             self.moveTask = nil
@@ -305,6 +311,27 @@ final class LinakDeskController: NSObject, DeskController {
         p.writeValue(LinakGATT.encodeHeight(internalHeight), for: c, type: .withResponse)
     }
 
+    private var isHeightDataFresh: Bool {
+        guard let t = lastHeightUpdateAt else { return false }
+        return Date().timeIntervalSince(t) < 2.0
+    }
+
+    private func pollHeightSpeed() async -> (height: Int, speed: Int)? {
+        if refOutputReadSupported, let c = referenceOutputChar {
+            let marker = Date()
+            peripheral?.readValue(for: c)
+            while Date().timeIntervalSince(marker) < 1.0 {
+                if let t = lastHeightUpdateAt, t >= marker { break }
+                try? await Task.sleep(nanoseconds: 25_000_000)
+            }
+            if let t = lastHeightUpdateAt, t >= marker {
+                return (lastHeightInternal, lastSpeedInternal)
+            }
+        }
+        guard isHeightDataFresh else { return nil }
+        return (lastHeightInternal, lastSpeedInternal)
+    }
+
     // MARK: - DPG handshake (port of linak_controller/dpg.py initialise)
 
     private func ensureDpgSubscribed() {
@@ -375,6 +402,8 @@ final class LinakDeskController: NSObject, DeskController {
         dpgChar = nil
         controlErrorChar = nil
         didStartHandshake = false
+        lastHeightUpdateAt = nil
+        refOutputReadSupported = false
     }
 
     private func reconnectIfNeeded() {
@@ -529,7 +558,10 @@ extension LinakDeskController: CBPeripheralDelegate {
                 referenceInputChar = c
             case LinakGATT.referenceOutputOneChar:
                 referenceOutputChar = c
-                peripheral.setNotifyValue(true, for: c)
+                refOutputReadSupported = c.properties.contains(.read)
+                if c.properties.contains(.notify) || c.properties.contains(.indicate) {
+                    peripheral.setNotifyValue(true, for: c)
+                }
             case LinakGATT.controlCommandChar:
                 controlCommandChar = c
             case LinakGATT.dpgChar:
@@ -547,7 +579,7 @@ extension LinakDeskController: CBPeripheralDelegate {
             Task { [weak self] in
                 guard let self else { return }
                 await self.performDPGHandshake()
-                if let c = self.referenceOutputChar { self.peripheral?.readValue(for: c) }
+                if let c = self.referenceOutputChar, self.refOutputReadSupported { self.peripheral?.readValue(for: c) }
                 self.reconnectAttempts = 0
                 self.update(connection: .connected)
             }
@@ -561,6 +593,7 @@ extension LinakDeskController: CBPeripheralDelegate {
             let (h, s) = LinakGATT.decodeHeightSpeed(data)
             lastHeightInternal = h
             lastSpeedInternal = s
+            lastHeightUpdateAt = Date()
             let snap = DeskSnapshot(
                 heightMm: lastHumanHeightMm(),
                 speedMmPerSec: lastSpeedMmPerSec(),

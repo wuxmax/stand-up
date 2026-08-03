@@ -64,7 +64,7 @@ python3 scripts/generate_icon.py
 The LINAK driver (`StandUp/Desk/Linak/`) is a native CoreBluetooth port of `rhyst/linak-controller`'s protocol, validated against a real LINAK desk (connect, DPG handshake, live height, jog, and sit/stand presets all verified working).
 
 - `LinakGATT.swift` — GATT service/characteristic UUIDs and byte packing (Reference Input/Output, Control, DPG).
-- `LinakDeskController.swift` — `CBCentralManager`/`CBPeripheral` flow: connect (by UUID or auto-scan), discover services, run the DPG init handshake (capabilities, set user-id byte to 1, read base offset), subscribe to Reference Output for live height/speed, and a move loop that repeatedly writes the target height to Reference Input until the desk reaches it (speed 0 within ~0.5 mm of the target); changing the target mid-move simply retargets the running loop, so the desk reverses without ever receiving a `stop` during motion.
+- `LinakDeskController.swift` — `CBCentralManager`/`CBPeripheral` flow: connect (by UUID or auto-scan), discover services, run the DPG init handshake (capabilities, set user-id byte to 1, read base offset), subscribe to Reference Output for live height/speed, and a move loop that repeatedly writes the target height to Reference Input and actively polls the current height/speed until the desk reaches the target (speed 0 within ~0.5 mm, confirmed twice). Changing the target mid-move simply retargets the running loop, so after the desk's brief direction-reversal lockout it continues to the latest target — without ever receiving a `stop` during motion.
 
 ### Connection resilience & auto-reconnect
 

@@ -336,10 +336,11 @@ final class LinakDeskController: NSObject, DeskController {
     }
 
     private func finishMove(target: DeskTarget) {
+        moveTarget = nil
         snapshot = DeskSnapshot(
             heightMm: lastHumanHeightMm(),
             speedMmPerSec: 0,
-            target: target, isMoving: false, connection: snapshot.connection
+            target: nil, isMoving: false, connection: snapshot.connection
         )
         notify(.snapshot(snapshot))
         log("Reached \(lastHumanHeightMm())mm")

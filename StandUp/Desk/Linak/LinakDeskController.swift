@@ -195,34 +195,52 @@ final class LinakDeskController: NSObject, DeskController {
             var trackedTarget = self.moveTargetInternal
             var lastLoggedHeight = Int.min
             var consecutiveArrived = 0
-            var silenceLogged = false
+            var noProgressCount = 0
+            var kickAfter = 3
+            var silenceCount = 0
             let startedAt = Date()
             while !Task.isCancelled {
                 let currentTarget = self.moveTargetInternal
                 if currentTarget != trackedTarget {
                     trackedTarget = currentTarget
                     consecutiveArrived = 0
+                    noProgressCount = 0
+                    kickAfter = 3
                 }
                 self.writeReferenceInput(currentTarget)
                 try? await Task.sleep(nanoseconds: periodNs)
-                guard let (height, speed) = await self.pollHeightSpeed() else {
-                    if !silenceLogged {
-                        silenceLogged = true
-                        self.log("Desk not reporting height — waiting for it to respond...")
+                guard let (height, speed) = self.pollHeightSpeed() else {
+                    silenceCount += 1
+                    if silenceCount == 3 {
+                        self.log("Desk not reporting height — re-arming (wakeup+stop)")
+                        self.writeCommand(.wakeup)
+                        self.writeCommand(.stop)
                     }
                     if Date().timeIntervalSince(startedAt) > maxDuration { break }
                     continue
                 }
-                silenceLogged = false
+                silenceCount = 0
                 if height != lastLoggedHeight {
                     lastLoggedHeight = height
                     self.log("Height: \((height / 10) + self.resolvedBaseMm())mm Speed: \(speed / 100)mm/s")
                 }
-                if speed == 0 && abs(height - currentTarget) <= 5 {
+                let atTarget = abs(height - currentTarget) <= 5
+                if speed == 0 && atTarget {
                     consecutiveArrived += 1
                     if consecutiveArrived >= 2 { break }
                 } else {
                     consecutiveArrived = 0
+                }
+                if speed == 0 && !atTarget {
+                    noProgressCount += 1
+                    if noProgressCount >= kickAfter {
+                        noProgressCount = 0
+                        kickAfter = min(kickAfter * 2, 12)
+                        self.controlKick(toward: currentTarget, from: height)
+                    }
+                } else {
+                    noProgressCount = 0
+                    kickAfter = 3
                 }
                 if Date().timeIntervalSince(startedAt) > maxDuration { break }
             }
@@ -316,20 +334,18 @@ final class LinakDeskController: NSObject, DeskController {
         return Date().timeIntervalSince(t) < 2.0
     }
 
-    private func pollHeightSpeed() async -> (height: Int, speed: Int)? {
+    private func pollHeightSpeed() -> (height: Int, speed: Int)? {
         if refOutputReadSupported, let c = referenceOutputChar {
-            let marker = Date()
             peripheral?.readValue(for: c)
-            while Date().timeIntervalSince(marker) < 1.0 {
-                if let t = lastHeightUpdateAt, t >= marker { break }
-                try? await Task.sleep(nanoseconds: 25_000_000)
-            }
-            if let t = lastHeightUpdateAt, t >= marker {
-                return (lastHeightInternal, lastSpeedInternal)
-            }
         }
         guard isHeightDataFresh else { return nil }
         return (lastHeightInternal, lastSpeedInternal)
+    }
+
+    private func controlKick(toward target: Int, from height: Int) {
+        log("Desk stalled \(abs(target - height) / 10)mm from target — control kick")
+        writeCommand(.wakeup)
+        writeCommand(target > height ? .moveUp : .moveDown)
     }
 
     // MARK: - DPG handshake (port of linak_controller/dpg.py initialise)

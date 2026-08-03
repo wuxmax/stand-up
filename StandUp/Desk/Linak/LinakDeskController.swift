@@ -18,6 +18,8 @@ final class LinakDeskController: NSObject, DeskController {
     private var controlErrorChar: CBCharacteristic?
 
     private var moveTask: Task<Void, Never>?
+    private var moveTargetInternal: Int = 0
+    private var moveTarget: DeskTarget?
     private var jogTask: Task<Void, Never>?
     private var lastHeightInternal: Int = 0
     private var lastSpeedInternal: Int = 0
@@ -153,16 +155,10 @@ final class LinakDeskController: NSObject, DeskController {
         jogTask?.cancel()
         jogTask = nil
 
-        let previous = moveTask
-        previous?.cancel()
-        if previous != nil {
-            writeCommand(.stop)
-            await previous?.value
-        }
-
         let targetMm = settings.targetHeightMm(for: target)
-        let baseMm = resolvedBaseMm()
-        let internalTarget = (targetMm - baseMm) * 10
+        let internalTarget = (targetMm - resolvedBaseMm()) * 10
+        moveTargetInternal = internalTarget
+        moveTarget = target
 
         snapshot = DeskSnapshot(
             heightMm: lastHumanHeightMm(),
@@ -170,30 +166,45 @@ final class LinakDeskController: NSObject, DeskController {
             target: target, isMoving: true, connection: snapshot.connection
         )
         notify(.snapshot(snapshot))
-        log("Moving to \(targetMm)mm (internal \(internalTarget))")
 
         if abs(lastHeightInternal - internalTarget) <= 5 {
+            moveTask?.cancel()
+            moveTask = nil
+            writeCommand(.stop)
             finishMove(target: target)
             return
         }
 
+        if moveTask != nil {
+            log("Retargeting in-flight move to \(targetMm)mm (internal \(internalTarget))")
+            return
+        }
+
+        log("Moving to \(targetMm)mm (internal \(internalTarget))")
         writeCommand(.wakeup)
         writeCommand(.stop)
 
         let periodNs = UInt64(max(50_000_000, Int(settings.moveCommandPeriod * 1_000_000_000)))
         let maxIters = Int(60.0 / max(0.1, settings.moveCommandPeriod)) + 2
         let stalledLimit = max(4, Int(4.0 / max(0.1, settings.moveCommandPeriod)))
-        moveTask = Task { [weak self] in
+        let task = Task { [weak self] in
             guard let self else { return }
             var iters = 0
             var stalled = 0
             var reachedCount = 0
+            var trackedTarget = self.moveTargetInternal
             while !Task.isCancelled {
-                self.writeReferenceInput(internalTarget)
+                let currentTarget = self.moveTargetInternal
+                if currentTarget != trackedTarget {
+                    trackedTarget = currentTarget
+                    stalled = 0
+                    reachedCount = 0
+                }
+                self.writeReferenceInput(currentTarget)
                 try? await Task.sleep(nanoseconds: periodNs)
                 let speed = self.lastSpeedInternal
                 let height = self.lastHeightInternal
-                let atTarget = abs(height - internalTarget) <= 5
+                let atTarget = abs(height - currentTarget) <= 5
                 if atTarget && speed == 0 {
                     reachedCount += 1
                     if reachedCount >= 2 { break }
@@ -210,9 +221,11 @@ final class LinakDeskController: NSObject, DeskController {
                 if iters >= maxIters { break }
             }
             if Task.isCancelled { return }
-            self.finishMove(target: target)
+            self.moveTask = nil
+            self.finishMove(target: self.moveTarget ?? target)
         }
-        await moveTask?.value
+        moveTask = task
+        await task.value
     }
 
     func jogUp() {

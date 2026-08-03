@@ -198,6 +198,7 @@ final class LinakDeskController: NSObject, DeskController {
             var noProgressCount = 0
             var kickAfter = 3
             var silenceCount = 0
+            var withholdingForReversal = false
             let startedAt = Date()
             while !Task.isCancelled {
                 let currentTarget = self.moveTargetInternal
@@ -207,7 +208,22 @@ final class LinakDeskController: NSObject, DeskController {
                     noProgressCount = 0
                     kickAfter = 3
                 }
-                self.writeReferenceInput(currentTarget)
+                let reversalPending = (self.lastSpeedInternal > 0 && currentTarget < self.lastHeightInternal)
+                    || (self.lastSpeedInternal < 0 && currentTarget > self.lastHeightInternal)
+                if reversalPending {
+                    if !withholdingForReversal {
+                        withholdingForReversal = true
+                        self.log("Reversal requested — decelerating before re-targeting")
+                    }
+                } else {
+                    if withholdingForReversal {
+                        withholdingForReversal = false
+                        self.log("Desk at rest — re-arming for new target")
+                        self.writeCommand(.wakeup)
+                        self.writeCommand(.stop)
+                    }
+                    self.writeReferenceInput(currentTarget)
+                }
                 try? await Task.sleep(nanoseconds: periodNs)
                 guard let (height, speed) = self.pollHeightSpeed() else {
                     silenceCount += 1
@@ -231,7 +247,7 @@ final class LinakDeskController: NSObject, DeskController {
                 } else {
                     consecutiveArrived = 0
                 }
-                if speed == 0 && !atTarget {
+                if speed == 0 && !atTarget && !withholdingForReversal {
                     noProgressCount += 1
                     if noProgressCount >= kickAfter {
                         noProgressCount = 0
@@ -259,6 +275,7 @@ final class LinakDeskController: NSObject, DeskController {
         jogTask?.cancel()
         writeCommand(.wakeup)
         log("Jog up")
+        clearMoveTarget()
         jogTask = Task { [weak self] in
             guard let self else { return }
             while !Task.isCancelled {
@@ -275,6 +292,7 @@ final class LinakDeskController: NSObject, DeskController {
         jogTask?.cancel()
         writeCommand(.wakeup)
         log("Jog down")
+        clearMoveTarget()
         jogTask = Task { [weak self] in
             guard let self else { return }
             while !Task.isCancelled {
@@ -292,6 +310,12 @@ final class LinakDeskController: NSObject, DeskController {
         moveTask = nil
         writeCommand(.stop)
         log("Stop")
+        snapshot = DeskSnapshot(
+            heightMm: snapshot.heightMm,
+            speedMmPerSec: 0,
+            target: nil, isMoving: false, connection: snapshot.connection
+        )
+        notify(.snapshot(snapshot))
     }
 
     // MARK: - Helpers
@@ -317,6 +341,16 @@ final class LinakDeskController: NSObject, DeskController {
         )
         notify(.snapshot(snapshot))
         log("Reached \(lastHumanHeightMm())mm")
+    }
+
+    private func clearMoveTarget() {
+        moveTarget = nil
+        snapshot = DeskSnapshot(
+            heightMm: snapshot.heightMm,
+            speedMmPerSec: snapshot.speedMmPerSec,
+            target: nil, isMoving: snapshot.isMoving, connection: snapshot.connection
+        )
+        notify(.snapshot(snapshot))
     }
 
     private func writeCommand(_ cmd: LinakGATT.Command) {

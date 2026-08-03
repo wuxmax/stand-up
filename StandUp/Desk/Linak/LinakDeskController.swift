@@ -20,6 +20,7 @@ final class LinakDeskController: NSObject, DeskController {
     private var moveTask: Task<Void, Never>?
     private var moveTargetInternal: Int = 0
     private var moveTarget: DeskTarget?
+    private var controlErrorEncountered = false
     private var jogTask: Task<Void, Never>?
     private var lastHeightInternal: Int = 0
     private var lastSpeedInternal: Int = 0
@@ -171,7 +172,7 @@ final class LinakDeskController: NSObject, DeskController {
         )
         notify(.snapshot(snapshot))
 
-        if abs(lastHeightInternal - internalTarget) <= 5, isHeightDataFresh {
+        if abs(lastHeightInternal - internalTarget) <= 5 {
             moveTask?.cancel()
             moveTask = nil
             writeCommand(.stop)
@@ -187,6 +188,7 @@ final class LinakDeskController: NSObject, DeskController {
         log("Moving to \(targetMm)mm (internal \(internalTarget))")
         writeCommand(.wakeup)
         writeCommand(.stop)
+        controlErrorEncountered = false
 
         let periodNs = UInt64(max(50_000_000, Int(settings.moveCommandPeriod * 1_000_000_000)))
         let maxDuration: TimeInterval = 60
@@ -247,7 +249,7 @@ final class LinakDeskController: NSObject, DeskController {
                 } else {
                     consecutiveArrived = 0
                 }
-                if speed == 0 && !atTarget && !withholdingForReversal {
+                if speed == 0 && !atTarget && !withholdingForReversal && !self.controlErrorEncountered {
                     noProgressCount += 1
                     if noProgressCount >= kickAfter {
                         noProgressCount = 0
@@ -661,6 +663,7 @@ extension LinakDeskController: CBPeripheralDelegate {
                 log("DPG notification (unsolicited): \(data.map { String(format: "%02x", $0) }.joined(separator: " "))")
             }
         case LinakGATT.controlErrorChar:
+            controlErrorEncountered = true
             log("Control error: \(data.map { String(format: "%02x", $0) }.joined(separator: " "))")
         default:
             break

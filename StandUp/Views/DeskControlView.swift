@@ -43,18 +43,17 @@ struct DeskControlView: View {
                     .font(.caption.weight(.medium))
             }
             Spacer()
-            if let target = appState.deskSnapshot.target,
-               let height = appState.deskSnapshot.heightMm {
-                let targetMm = appState.deskSettings.targetHeightMm(for: target)
-                let direction = targetMm >= height ? "arrow.up" : "arrow.down"
-                HStack(spacing: 2) {
-                    Image(systemName: direction)
-                        .font(.caption.weight(.semibold))
-                    Text("\(targetMm)")
-                        .font(.system(.caption, design: .monospaced).weight(.semibold))
-                        .monospacedDigit()
-                }
-                .foregroundStyle(.tint)
+            if appState.deskSnapshot.isMoving || appState.deskSnapshot.target != nil {
+                let goingUp: Bool = {
+                    if let target = appState.deskSnapshot.target,
+                       let height = appState.deskSnapshot.heightMm {
+                        return appState.deskSettings.targetHeightMm(for: target) >= height
+                    }
+                    return (appState.deskSnapshot.speedMmPerSec ?? 0) > 0
+                }()
+                Image(systemName: goingUp ? "arrow.up" : "arrow.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tint)
             }
         }
     }

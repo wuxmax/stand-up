@@ -40,6 +40,12 @@ final class LinakDeskController: NSObject, DeskController {
 
     private let initialReconnectDelay: TimeInterval = 2
     private let maxReconnectDelay: TimeInterval = 30
+    private let pingInterval: TimeInterval = 10
+    private let maxPingMisses = 3
+    private let arrivalToleranceInternal = 20
+    private var pingTask: Task<Void, Never>?
+    private var pingMisses = 0
+    private var lastWriteErrorLogAt: Date?
 
     init(settings: DeskSettings) {
         self.settings = settings
@@ -59,6 +65,8 @@ final class LinakDeskController: NSObject, DeskController {
     deinit {
         reconnectTask?.cancel()
         reconnectTask = nil
+        pingTask?.cancel()
+        pingTask = nil
         if let o = wakeObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(o)
             wakeObserver = nil
@@ -126,6 +134,9 @@ final class LinakDeskController: NSObject, DeskController {
         reconnectTask?.cancel()
         reconnectTask = nil
         reconnectAttempts = 0
+        pingTask?.cancel()
+        pingTask = nil
+        pingMisses = 0
         dpgBox.continuation?.resume(throwing: CancellationError())
         dpgBox.continuation = nil
         dpgSubscribed = false
@@ -172,7 +183,7 @@ final class LinakDeskController: NSObject, DeskController {
         )
         notify(.snapshot(snapshot))
 
-        if abs(lastHeightInternal - internalTarget) <= 5 {
+        if abs(lastHeightInternal - internalTarget) <= arrivalToleranceInternal {
             moveTask?.cancel()
             moveTask = nil
             writeCommand(.stop)
@@ -242,7 +253,7 @@ final class LinakDeskController: NSObject, DeskController {
                     lastLoggedHeight = height
                     self.log("Height: \((height / 10) + self.resolvedBaseMm())mm Speed: \(speed / 100)mm/s")
                 }
-                let atTarget = abs(height - currentTarget) <= 5
+                let atTarget = abs(height - currentTarget) <= self.arrivalToleranceInternal
                 if speed == 0 && atTarget {
                     consecutiveArrived += 1
                     if consecutiveArrived >= 2 { break }
@@ -446,6 +457,9 @@ final class LinakDeskController: NSObject, DeskController {
         moveTask = nil
         jogTask?.cancel()
         jogTask = nil
+        pingTask?.cancel()
+        pingTask = nil
+        pingMisses = 0
         dpgBox.continuation?.resume(throwing: CancellationError())
         dpgBox.continuation = nil
         dpgSubscribed = false
@@ -502,10 +516,62 @@ final class LinakDeskController: NSObject, DeskController {
             break
         }
         log("System woke from sleep — re-establishing desk link")
+        recoverStaleLink()
+    }
+
+    private func recoverStaleLink() {
         resetLinkState()
         peripheral = nil
         update(connection: .disconnected)
         reconnectIfNeeded()
+    }
+
+    private func startPingWatchdog() {
+        pingTask?.cancel()
+        pingMisses = 0
+        let interval = pingInterval
+        pingTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+                guard let self else { return }
+                if Task.isCancelled { break }
+                if self.moveTask != nil || self.jogTask != nil { continue }
+                guard self.snapshot.connection == .connected else { continue }
+                let alive = await self.pingDesk()
+                await MainActor.run {
+                    guard !Task.isCancelled, self.snapshot.connection == .connected else { return }
+                    guard self.moveTask == nil, self.jogTask == nil else { return }
+                    if alive {
+                        self.pingMisses = 0
+                    } else {
+                        self.pingMisses += 1
+                        self.log("Liveness probe missed (\(self.pingMisses)/\(self.maxPingMisses))")
+                        if self.pingMisses >= self.maxPingMisses {
+                            self.log("Desk link stale — forcing reconnect")
+                            self.recoverStaleLink()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func pingDesk() async -> Bool {
+        guard dpgChar != nil, peripheral != nil, dpgBox.continuation == nil else { return true }
+        return (try? await dpgRequest(.getCapabilities, payload: nil)) != nil
+    }
+
+    private func handleWriteError(for characteristicUUID: CBUUID, _ error: Error) {
+        let now = Date()
+        if lastWriteErrorLogAt.map({ now.timeIntervalSince($0) > 2 }) ?? true {
+            lastWriteErrorLogAt = now
+            log("Write error for \(characteristicUUID): \(error.localizedDescription)")
+        }
+        guard !isTearingDown,
+              moveTask == nil, jogTask == nil,
+              snapshot.connection == .connected else { return }
+        log("Write failed on a connected link — forcing reconnect")
+        recoverStaleLink()
     }
 
     private func update(connection: DeskConnectionState) {
@@ -634,6 +700,8 @@ extension LinakDeskController: CBPeripheralDelegate {
                 await self.performDPGHandshake()
                 if let c = self.referenceOutputChar, self.refOutputReadSupported { self.peripheral?.readValue(for: c) }
                 self.reconnectAttempts = 0
+                self.pingMisses = 0
+                self.startPingWatchdog()
                 self.update(connection: .connected)
             }
         }
@@ -669,6 +737,12 @@ extension LinakDeskController: CBPeripheralDelegate {
         default:
             break
         }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard !isTearingDown else { return }
+        guard let error else { return }
+        handleWriteError(for: characteristic.uuid, error)
     }
 }
 
